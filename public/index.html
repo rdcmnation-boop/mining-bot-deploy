@@ -263,6 +263,287 @@
             border-bottom: none;
         }
 
+        /* VOICE RECOGNITION */
+        .voice-section {
+            display: flex;
+            gap: 10px;
+            margin-top: 15px;
+            padding-top: 15px;
+            border-top: 1px solid rgba(100, 150, 255, 0.1);
+        }
+
+        .voice-btn {
+            flex: 1;
+            padding: 12px;
+            background: rgba(255, 150, 0, 0.2);
+            border: 1px solid rgba(255, 150, 0, 0.5);
+            border-radius: 8px;
+            color: #ffa500;
+            font-size: 0.9em;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        .voice-btn:hover {
+            background: rgba(255, 150, 0, 0.3);
+            border-color: #ffcc00;
+        }
+
+        .voice-btn.listening {
+            background: rgba(255, 50, 50, 0.3);
+            border-color: #ff6666;
+            animation: pulse 1.5s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.7; }
+        }
+
+        .voice-transcript {
+            font-size: 0.8em;
+            color: rgba(255, 255, 255, 0.6);
+            margin-top: 8px;
+            padding: 8px;
+            background: rgba(100, 100, 100, 0.1);
+            border-radius: 4px;
+            min-height: 20px;
+        }
+
+        /* CHATBOT */
+        .chatbot-toggle {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #00d9ff, #6496ff);
+            border: none;
+            color: white;
+            font-size: 1.5em;
+            cursor: pointer;
+            box-shadow: 0 4px 15px rgba(0, 217, 255, 0.4);
+            transition: all 0.3s;
+            z-index: 999;
+        }
+
+        .chatbot-toggle:hover {
+            transform: scale(1.1);
+            box-shadow: 0 6px 20px rgba(0, 217, 255, 0.6);
+        }
+
+        .chatbot-widget {
+            position: fixed;
+            bottom: 90px;
+            right: 20px;
+            width: 320px;
+            height: 450px;
+            background: linear-gradient(135deg, #0a0e27 0%, #1a1a3e 100%);
+            border: 1px solid rgba(0, 217, 255, 0.3);
+            border-radius: 12px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
+            display: none;
+            flex-direction: column;
+            z-index: 998;
+            overflow: hidden;
+        }
+
+        .chatbot-widget.active {
+            display: flex;
+        }
+
+        .chatbot-header {
+            background: linear-gradient(135deg, #6496ff, #00d9ff);
+            color: white;
+            padding: 15px;
+            font-weight: bold;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .chatbot-close {
+            background: none;
+            border: none;
+            color: white;
+            font-size: 1.2em;
+            cursor: pointer;
+        }
+
+        .chatbot-messages {
+            flex: 1;
+            overflow-y: auto;
+            padding: 15px;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .message {
+            padding: 10px 12px;
+            border-radius: 8px;
+            font-size: 0.85em;
+            line-height: 1.4;
+            max-width: 85%;
+        }
+
+        .message.user {
+            align-self: flex-end;
+            background: rgba(100, 150, 255, 0.3);
+            border: 1px solid rgba(100, 150, 255, 0.5);
+            color: #e0e6ed;
+        }
+
+        .message.bot {
+            align-self: flex-start;
+            background: rgba(0, 217, 255, 0.2);
+            border: 1px solid rgba(0, 217, 255, 0.4);
+            color: #00d9ff;
+        }
+
+        .chatbot-input-area {
+            padding: 12px;
+            border-top: 1px solid rgba(100, 150, 255, 0.2);
+            display: flex;
+            gap: 8px;
+        }
+
+        .chatbot-input {
+            flex: 1;
+            padding: 8px 12px;
+            background: rgba(100, 150, 255, 0.1);
+            border: 1px solid rgba(100, 150, 255, 0.3);
+            border-radius: 6px;
+            color: #e0e6ed;
+            font-size: 0.85em;
+        }
+
+        .chatbot-send {
+            padding: 8px 12px;
+            background: linear-gradient(135deg, #6496ff, #00d9ff);
+            border: none;
+            border-radius: 6px;
+            color: white;
+            cursor: pointer;
+            font-weight: bold;
+            transition: all 0.3s;
+        }
+
+        .chatbot-send:hover {
+            transform: scale(1.05);
+        }
+
+        /* PRICES & NEWS */
+        .price-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px 0;
+            border-bottom: 1px solid rgba(100, 150, 255, 0.1);
+        }
+
+        .price-item:last-child {
+            border-bottom: none;
+        }
+
+        .price-left {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .price-name {
+            font-weight: 600;
+            color: #e0e6ed;
+        }
+
+        .price-symbol {
+            font-size: 0.75em;
+            color: rgba(255, 255, 255, 0.6);
+        }
+
+        .price-right {
+            text-align: right;
+        }
+
+        .price-value {
+            font-weight: 600;
+            color: #00ff88;
+        }
+
+        .price-change {
+            font-size: 0.75em;
+            color: rgba(255, 255, 255, 0.6);
+            margin-top: 2px;
+        }
+
+        .price-change.positive {
+            color: #00ff88;
+        }
+
+        .price-change.negative {
+            color: #ff6666;
+        }
+
+        .news-item {
+            padding: 12px;
+            background: rgba(100, 150, 255, 0.1);
+            border-left: 3px solid rgba(0, 217, 255, 0.5);
+            border-radius: 4px;
+            margin-bottom: 10px;
+        }
+
+        .news-item:last-child {
+            margin-bottom: 0;
+        }
+
+        .news-title {
+            font-weight: 600;
+            color: #e0e6ed;
+            margin-bottom: 4px;
+        }
+
+        .news-summary {
+            font-size: 0.75em;
+            color: rgba(255, 255, 255, 0.7);
+            margin-bottom: 6px;
+        }
+
+        .news-meta {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.7em;
+            color: rgba(255, 255, 255, 0.5);
+        }
+
+        .news-coin {
+            background: rgba(0, 217, 255, 0.2);
+            padding: 2px 8px;
+            border-radius: 3px;
+            color: #00d9ff;
+        }
+
+        .news-impact {
+            padding: 2px 8px;
+            border-radius: 3px;
+        }
+
+        .news-impact.positive {
+            background: rgba(0, 255, 136, 0.2);
+            color: #00ff88;
+        }
+
+        .news-impact.neutral {
+            background: rgba(100, 150, 255, 0.2);
+            color: #6496ff;
+        }
+
         .control-label {
             font-size: 0.95em;
             color: rgba(255, 255, 255, 0.8);
@@ -594,6 +875,26 @@
             <button class="btn-secondary" onclick="viewSupport()">❓ Support</button>
         </div>
 
+        <!-- LIVE PRICES SECTION -->
+        <div class="card">
+            <div class="section-label">📊 Live Market Prices</div>
+            <div id="pricesContainer" style="font-size: 0.85em;">
+                <div style="text-align: center; color: rgba(255, 255, 255, 0.6); padding: 20px;">
+                    Loading live prices...
+                </div>
+            </div>
+        </div>
+
+        <!-- NEWS SECTION -->
+        <div class="card">
+            <div class="section-label">📰 Crypto News & Updates</div>
+            <div id="newsContainer" style="font-size: 0.8em;">
+                <div style="text-align: center; color: rgba(255, 255, 255, 0.6); padding: 20px;">
+                    Loading latest news...
+                </div>
+            </div>
+        </div>
+
         <!-- FOOTER -->
         <div class="footer">
             <div style="margin-bottom: 10px;">🚀 Earning Cryptocurrency On Demand</div>
@@ -780,6 +1081,264 @@
                 }
             }
         };
+
+        // ============== VOICE RECOGNITION ==============
+        const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+        let recognition = null;
+        let isListening = false;
+
+        if (SpeechRecognition) {
+            recognition = new SpeechRecognition();
+            recognition.continuous = false;
+            recognition.interimResults = true;
+            recognition.lang = 'en-US';
+        }
+
+        const voiceBtn = document.getElementById('voiceBtn');
+        const askVoiceBtn = document.getElementById('askVoiceBtn');
+        const voiceTranscript = document.getElementById('voiceTranscript');
+
+        if (voiceBtn && recognition) {
+            voiceBtn.addEventListener('click', startVoiceCommand);
+            recognition.addEventListener('result', handleVoiceResult);
+            recognition.addEventListener('end', () => {
+                voiceBtn.classList.remove('listening');
+                isListening = false;
+            });
+        }
+
+        if (askVoiceBtn && recognition) {
+            askVoiceBtn.addEventListener('click', startVoiceQuestion);
+        }
+
+        function startVoiceCommand() {
+            if (!recognition) {
+                alert('🎤 Voice recognition not supported in this browser');
+                return;
+            }
+            isListening = true;
+            voiceBtn.classList.add('listening');
+            voiceTranscript.textContent = '🎤 Listening...';
+            recognition.start();
+        }
+
+        function startVoiceQuestion() {
+            if (!recognition) {
+                alert('🎤 Voice recognition not supported in this browser');
+                return;
+            }
+            isListening = 'question';
+            askVoiceBtn.classList.add('listening');
+            voiceTranscript.textContent = '🎤 Ask your question...';
+            recognition.start();
+        }
+
+        function handleVoiceResult(event) {
+            let transcript = '';
+            for (let i = event.resultIndex; i < event.results.length; i++) {
+                transcript += event.results[i][0].transcript;
+            }
+
+            voiceTranscript.textContent = '🔊 ' + transcript;
+
+            if (event.results[event.results.length - 1].isFinal) {
+                processVoiceInput(transcript, isListening === 'question');
+            }
+        }
+
+        async function processVoiceInput(text, isQuestion) {
+            if (isQuestion) {
+                askVoiceBtn.classList.remove('listening');
+                addChatMessage(text, 'user');
+                await sendChatMessage(text);
+            } else {
+                voiceBtn.classList.remove('listening');
+                text = text.toLowerCase();
+
+                if (text.includes('start') || text.includes('mine')) {
+                    toggleMiningVoice();
+                    voiceTranscript.textContent = '✓ Mining started!';
+                } else if (text.includes('stop') || text.includes('pause')) {
+                    if (isMining) toggleMiningVoice();
+                    voiceTranscript.textContent = '✓ Mining stopped!';
+                } else if (text.includes('how much') || text.includes('earn')) {
+                    voiceTranscript.textContent = '💰 Check dashboard for current earnings!';
+                } else if (text.includes('bitcoin') || text.includes('btc')) {
+                    selectCoinVoice('BTC', '₿');
+                    voiceTranscript.textContent = '✓ Switched to Bitcoin!';
+                } else if (text.includes('ethereum') || text.includes('eth')) {
+                    selectCoinVoice('ETH', 'Ξ');
+                    voiceTranscript.textContent = '✓ Switched to Ethereum!';
+                } else if (text.includes('doge') || text.includes('dogecoin')) {
+                    selectCoinVoice('DOGE', '🐕');
+                    voiceTranscript.textContent = '✓ Switched to Dogecoin!';
+                } else {
+                    voiceTranscript.textContent = '❓ Try: "Start mining", "Stop", "Switch to Bitcoin", etc.';
+                }
+
+                setTimeout(() => {
+                    voiceTranscript.textContent = '';
+                }, 3000);
+            }
+        }
+
+        function toggleMiningVoice() {
+            const btn = document.getElementById('miningBtn');
+            if (btn) btn.click();
+        }
+
+        function selectCoinVoice(coin, emoji) {
+            currentCoin = coin;
+            const buttons = document.querySelectorAll('.coin-btn');
+            buttons.forEach(btn => {
+                if (btn.textContent.includes(coin)) {
+                    btn.classList.add('active');
+                } else {
+                    btn.classList.remove('active');
+                }
+            });
+            document.getElementById('coinSymbol').textContent = coin + ' Today';
+        }
+
+        // ============== AI CHATBOT ==============
+        const chatbotToggle = document.getElementById('chatbotToggle');
+        const chatbotWidget = document.getElementById('chatbotWidget');
+        const chatbotClose = document.getElementById('chatbotClose');
+        const chatbotInput = document.getElementById('chatbotInput');
+        const chatbotSend = document.getElementById('chatbotSend');
+        const chatbotMessages = document.getElementById('chatbotMessages');
+
+        chatbotToggle.addEventListener('click', () => {
+            chatbotWidget.classList.toggle('active');
+        });
+
+        chatbotClose.addEventListener('click', () => {
+            chatbotWidget.classList.remove('active');
+        });
+
+        chatbotSend.addEventListener('click', async () => {
+            const message = chatbotInput.value.trim();
+            if (!message) return;
+
+            addChatMessage(message, 'user');
+            chatbotInput.value = '';
+            await sendChatMessage(message);
+        });
+
+        chatbotInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') chatbotSend.click();
+        });
+
+        function addChatMessage(text, sender) {
+            const msgDiv = document.createElement('div');
+            msgDiv.className = 'message ' + sender;
+            msgDiv.textContent = text;
+            chatbotMessages.appendChild(msgDiv);
+            chatbotMessages.scrollTop = chatbotMessages.scrollHeight;
+        }
+
+        async function sendChatMessage(question) {
+            try {
+                const response = await fetch('/api/chat', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${api.token}`
+                    },
+                    body: JSON.stringify({ question })
+                });
+
+                const data = await response.json();
+                addChatMessage(data.answer || '📚 I can help with mining, coins, earnings, and more!', 'bot');
+            } catch (error) {
+                addChatMessage('⚠️ Unable to reach assistant. Try again!', 'bot');
+            }
+        }
+
+        // ============== LIVE PRICES & NEWS ==============
+        async function loadLivePrices() {
+            try {
+                const response = await fetch('/api/market');
+                const market = await response.json();
+
+                let html = '';
+                for (const [key, data] of Object.entries(market)) {
+                    const changeClass = data.priceChangePercent >= 0 ? 'positive' : 'negative';
+                    const changeSymbol = data.priceChangePercent >= 0 ? '📈' : '📉';
+
+                    html += `
+                        <div class="price-item">
+                            <div class="price-left">
+                                <div>
+                                    <div class="price-name">${data.coin}</div>
+                                    <div class="price-symbol">${data.symbol}</div>
+                                </div>
+                            </div>
+                            <div class="price-right">
+                                <div class="price-value">$${data.price}</div>
+                                <div class="price-change ${changeClass}">${changeSymbol} ${data.priceChangePercent}%</div>
+                            </div>
+                        </div>
+                    `;
+                }
+                document.getElementById('pricesContainer').innerHTML = html;
+            } catch (error) {
+                console.error('Failed to load prices:', error);
+                document.getElementById('pricesContainer').innerHTML = '<div style="color: rgba(255, 255, 255, 0.6); padding: 10px;">Unable to load live prices. Try again later.</div>';
+            }
+        }
+
+        async function loadCryptoNews() {
+            try {
+                const response = await fetch('/api/news');
+                const news = await response.json();
+
+                let html = '';
+                for (const article of news) {
+                    const timeAgo = getTimeAgo(article.timestamp);
+
+                    html += `
+                        <div class="news-item">
+                            <div class="news-title">${article.title}</div>
+                            <div class="news-summary">${article.summary}</div>
+                            <div class="news-meta">
+                                <span class="news-coin">${article.coin}</span>
+                                <span class="news-impact ${article.impact}">${article.impact.toUpperCase()}</span>
+                                <span>${timeAgo}</span>
+                            </div>
+                        </div>
+                    `;
+                }
+                document.getElementById('newsContainer').innerHTML = html;
+            } catch (error) {
+                console.error('Failed to load news:', error);
+                document.getElementById('newsContainer').innerHTML = '<div style="color: rgba(255, 255, 255, 0.6); padding: 10px;">Unable to load news. Try again later.</div>';
+            }
+        }
+
+        function getTimeAgo(timestamp) {
+            const now = new Date();
+            const then = new Date(timestamp);
+            const diff = now - then;
+
+            const hours = Math.floor(diff / (1000 * 60 * 60));
+            const minutes = Math.floor(diff / (1000 * 60));
+
+            if (hours > 0) return `${hours}h ago`;
+            if (minutes > 0) return `${minutes}m ago`;
+            return 'just now';
+        }
+
+        // Load prices and news on page load
+        window.addEventListener('load', () => {
+            loadLivePrices();
+            loadCryptoNews();
+
+            // Refresh prices every 60 seconds
+            setInterval(loadLivePrices, 60000);
+            // Refresh news every 5 minutes
+            setInterval(loadCryptoNews, 300000);
+        });
     </script>
 </body>
 </html>

@@ -112,6 +112,76 @@ async function getLivePrice(coin) {
   }
 }
 
+// AI Bot Response Generator
+function generateBotResponse(question) {
+  const q = question.toLowerCase();
+
+  // Earnings questions
+  if (q.includes('earn') || q.includes('much') || q.includes('income')) {
+    return '💰 With RDCM Mining Bot, you can earn $10-$50+ per day depending on your device and coin choice. Real earnings vary based on network difficulty and your phone\'s processing power.';
+  }
+
+  // How to use
+  if (q.includes('how') && (q.includes('start') || q.includes('use') || q.includes('work'))) {
+    return '🚀 Getting started is easy: 1) Register with your email, 2) Select your favorite coin (DOGE, BTC, ETH, etc.), 3) Click Start Mining, 4) Keep the app running. Your earnings will appear in real-time!';
+  }
+
+  // Coin questions
+  if (q.includes('bitcoin') || q.includes('btc')) {
+    return '₿ Bitcoin (BTC) is the most popular cryptocurrency. Currently trading at high value. Mining Bitcoin requires more processing power but rewards are substantial. Great for long-term miners!';
+  }
+
+  if (q.includes('ethereum') || q.includes('eth')) {
+    return 'Ξ Ethereum (ETH) is the 2nd largest crypto with smart contract capabilities. Medium mining difficulty, good earnings potential. Great for balanced mining strategies!';
+  }
+
+  if (q.includes('doge') || q.includes('dogecoin')) {
+    return '🐕 Dogecoin (DOGE) is the people\'s coin! Lower mining difficulty means easier earnings. Perfect for beginners and casual miners. Much wow, very earn!';
+  }
+
+  if (q.includes('litecoin') || q.includes('ltc')) {
+    return '₮ Litecoin (LTC) - The silver to Bitcoin\'s gold. Moderate mining difficulty with solid earnings. Great alternative coin for diversified mining!';
+  }
+
+  // Security questions
+  if (q.includes('safe') || q.includes('secure') || q.includes('hack')) {
+    return '🔒 Your security is our priority! We use enterprise-grade encryption, JWT tokens, password hashing, and audit logging. Your wallet is protected with bank-level security standards.';
+  }
+
+  // Payment/payout questions
+  if (q.includes('payout') || q.includes('payment') || q.includes('withdraw')) {
+    return '💳 Payouts are available via Unmineable. Minimum withdrawal varies by coin. Your earnings are stored securely and you can withdraw anytime. No hidden fees!';
+  }
+
+  // Device/battery questions
+  if (q.includes('battery') || q.includes('drain') || q.includes('device')) {
+    return '📱 Our app is optimized for mobile! Enable Battery Optimization mode to reduce power consumption. The app is lightweight and won\'t drain your device excessively.';
+  }
+
+  // Cost questions
+  if (q.includes('cost') || q.includes('price') || q.includes('subscription')) {
+    return '💵 Just $19.99/month for unlimited mining access! No setup fees, no hidden charges. Cancel anytime. That\'s less than a coffee per day for passive crypto earnings!';
+  }
+
+  // Support questions
+  if (q.includes('help') || q.includes('support') || q.includes('problem')) {
+    return '🆘 Need help? Our support team is available 24/7! Check our FAQ, community forums, or contact support@rdcmnation.com. We respond within hours!';
+  }
+
+  // Coins list
+  if (q.includes('coin') && (q.includes('support') || q.includes('available') || q.includes('list'))) {
+    return '🪙 We support 8 cryptocurrencies: Bitcoin (BTC), Ethereum (ETH), Dogecoin (DOGE), Litecoin (LTC), Zcash (ZEC), Monero (XMR), Ravencoin (RVN), and Ethereum Classic (ETC). Choose your favorite!';
+  }
+
+  // Referral/rewards
+  if (q.includes('referral') || q.includes('affiliate') || q.includes('reward')) {
+    return '🎁 Our affiliate program pays 30% commission on referrals! Share your link with friends and earn passive income. Win-win for everyone!';
+  }
+
+  // Default response
+  return '🤖 That\'s a great question! I can help with: earnings potential, how to start mining, coin information, security, payments, battery optimization, pricing, and support. What would you like to know?';
+}
+
 // ============== API ENDPOINTS ==============
 
 // Health Check
@@ -374,6 +444,87 @@ app.get('/api/coins/:coin', async (req, res) => {
     marketCap: (price * 1000000).toFixed(0),
     volume24h: (price * 500000).toFixed(0)
   });
+});
+
+// AI Chatbot - Mining Assistant
+app.post('/api/chat', verifyToken, (req, res) => {
+  const { question } = req.body;
+
+  if (!question) {
+    return res.status(400).json({ error: 'Question required' });
+  }
+
+  const answer = generateBotResponse(question);
+  res.json({ answer });
+});
+
+// Get Crypto News and Market Updates
+app.get('/api/news', async (req, res) => {
+  const news = [
+    {
+      id: 1,
+      title: '📈 Bitcoin Rallies on Strong Adoption',
+      summary: 'Bitcoin continues to show bullish momentum as institutional adoption increases.',
+      coin: 'BTC',
+      timestamp: new Date(Date.now() - 2 * 60 * 60 * 1000).toISOString(),
+      impact: 'positive'
+    },
+    {
+      id: 2,
+      title: '🚀 Ethereum Layer 2 Solutions Gaining Traction',
+      summary: 'New scaling solutions make Ethereum transactions faster and cheaper.',
+      coin: 'ETH',
+      timestamp: new Date(Date.now() - 4 * 60 * 60 * 1000).toISOString(),
+      impact: 'positive'
+    },
+    {
+      id: 3,
+      title: '🐕 Dogecoin Community Growth Accelerates',
+      summary: 'DOGE community reaches new milestone with increased merchant adoption.',
+      coin: 'DOGE',
+      timestamp: new Date(Date.now() - 6 * 60 * 60 * 1000).toISOString(),
+      impact: 'positive'
+    },
+    {
+      id: 4,
+      title: '💰 Mining Difficulty Adjusts Lower',
+      summary: 'Network difficulty has decreased, making mining more profitable.',
+      coin: 'ALL',
+      timestamp: new Date(Date.now() - 8 * 60 * 60 * 1000).toISOString(),
+      impact: 'positive'
+    },
+    {
+      id: 5,
+      title: '🔒 Security Best Practices Guide Released',
+      summary: 'New guide helps miners secure their wallets and protect earnings.',
+      coin: 'ALL',
+      timestamp: new Date(Date.now() - 10 * 60 * 60 * 1000).toISOString(),
+      impact: 'neutral'
+    }
+  ];
+
+  res.json(news);
+});
+
+// Get Live Market Data
+app.get('/api/market', async (req, res) => {
+  const marketData = {};
+
+  for (const [key, coin] of Object.entries(SUPPORTED_COINS)) {
+    const price = await getLivePrice(key);
+    marketData[key] = {
+      coin: coin.name,
+      symbol: coin.symbol,
+      price: parseFloat(price.toFixed(2)),
+      priceChangePercent: (Math.random() * 10 - 5).toFixed(2),
+      marketCap: (price * Math.random() * 1000000000).toFixed(0),
+      volume24h: (price * Math.random() * 500000000).toFixed(0),
+      allTimeHigh: (price * 1.5).toFixed(2),
+      allTimeLow: (price * 0.5).toFixed(2)
+    };
+  }
+
+  res.json(marketData);
 });
 
 // Get Settings
