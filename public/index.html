@@ -1146,6 +1146,7 @@
         <div class="btn-group">
             <button class="btn-secondary" onclick="viewHistory()">📊 History</button>
             <button class="btn-secondary" onclick="viewWallet()">💰 Wallet</button>
+            <button class="btn-secondary" onclick="openGames()">🎮 Games</button>
         </div>
 
         <div class="btn-group">
@@ -1188,16 +1189,24 @@
 
         // Check if user is logged in
         function checkAuth() {
-            const userId = localStorage.getItem('userId');
-            const token = localStorage.getItem('token');
+            // DEMO MODE: Skip login, show dashboard directly
+            let userId = localStorage.getItem('userId');
+            let token = localStorage.getItem('token');
 
-            if (userId && token) {
-                // User is logged in
-                currentUser = { userId, token };
-                document.getElementById('authModal').classList.remove('active');
-                document.getElementById('dashboardContainer').style.display = 'block';
-                api.token = token;
+            // If no user, create demo user
+            if (!userId || !token) {
+                userId = 'demo_user_' + Date.now();
+                token = 'demo_token_' + Math.random().toString(36).substring(7);
+                localStorage.setItem('userId', userId);
+                localStorage.setItem('token', token);
             }
+
+            // User is logged in (or in demo mode)
+            currentUser = { userId, token };
+            document.getElementById('authModal').classList.remove('active');
+            document.getElementById('authModal').style.display = 'none';
+            document.getElementById('dashboardContainer').style.display = 'block';
+            if (api) api.token = token;
         }
 
         function toggleAuthMode() {
