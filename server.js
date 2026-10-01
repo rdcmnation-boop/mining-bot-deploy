@@ -10,14 +10,74 @@ const path = require('path');
 const http = require('http');
 const WebSocket = require('ws');
 const { v4: uuidv4 } = require('uuid');
+const jwt = require('jsonwebtoken');
+const bcrypt = require('bcryptjs');
+const rateLimit = require('express-rate-limit');
 
 const app = express();
 const PORT = process.env.PORT || 3001;
+const JWT_SECRET = process.env.JWT_SECRET || 'your-secret-key-change-in-production-' + Math.random().toString(36).substring(7);
 
 // Middleware
 app.use(cors());
 app.use(express.json());
 app.use(express.static(path.join(__dirname, 'public')));
+
+// Rate Limiting
+const limiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 minutes
+  max: 100, // limit each IP to 100 requests per windowMs
+  message: '⚠️ Too many requests, please try again later.'
+});
+
+const authLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: 5, // limit login attempts
+  message: '⚠️ Too many login attempts, please try again later.'
+});
+
+app.use(limiter);
+
+// Audit Logging System
+const auditLog = new Map();
+function logAudit(userId, action, details) {
+  const timestamp = new Date().toISOString();
+  const logEntry = {
+    userId,
+    action,
+    details,
+    timestamp,
+    ip: details.ip || 'unknown'
+  };
+  auditLog.set(uuidv4(), logEntry);
+  console.log(`📋 [AUDIT] ${timestamp} | User: ${userId} | Action: ${action} | Details: ${JSON.stringify(details)}`);
+}
+
+// JWT Verification Middleware
+function verifyToken(req, res, next) {
+  const token = req.headers.authorization?.split(' ')[1];
+  if (!token) {
+    return res.status(401).json({ error: 'No token provided' });
+  }
+  try {
+    const decoded = jwt.verify(token, JWT_SECRET);
+    req.userId = decoded.userId;
+    req.email = decoded.email;
+    next();
+  } catch (err) {
+    return res.status(403).json({ error: 'Invalid or expired token' });
+  }
+}
+
+// Input Validation
+function validateEmail(email) {
+  const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  return re.test(email);
+}
+
+function validatePassword(password) {
+  return password && password.length >= 6; // minimum 6 characters
+}
 
 // In-Memory Data Storage (MVP Version)
 const users = new Map();
@@ -59,78 +119,111 @@ app.get('/api/health', (req, res) => {
   res.json({ status: 'online', timestamp: new Date().toISOString() });
 });
 
-// Register User
-app.post('/api/auth/register', (req, res) => {
-  const { username, email, wallet_address } = req.body;
+// Register User (with password security)
+app.post('/api/auth/register', authLimiter, async (req, res) => {
+  const { username, email, password, wallet_address } = req.body;
 
-  if (!email) {
-    return res.status(400).json({ error: 'Email required' });
+  // Validate input
+  if (!email || !validateEmail(email)) {
+    return res.status(400).json({ error: 'Valid email required' });
+  }
+  if (!password || !validatePassword(password)) {
+    return res.status(400).json({ error: 'Password must be at least 6 characters' });
   }
 
-  const userId = `user_${uuidv4().substring(0, 8)}`;
-
-  users.set(userId, {
-    id: userId,
-    username: username || 'User',
-    email,
-    wallet_address: wallet_address || '',
-    created_at: new Date().toISOString()
-  });
-
-  settings.set(userId, {
-    battery_optimization: true,
-    low_power_mode: false,
-    push_notifications: true,
-    selected_coin: 'DOGE'
-  });
-
-  res.json({
-    success: true,
-    userId,
-    message: '✅ Registration successful! Ready to mine 24/7'
-  });
-});
-
-// Login User
-app.post('/api/auth/login', (req, res) => {
-  const { email } = req.body;
-
-  let userId = null;
-  for (const [id, user] of users.entries()) {
+  // Check if email already registered
+  for (const [, user] of users.entries()) {
     if (user.email === email) {
-      userId = id;
-      break;
+      logAudit('unknown', 'REGISTRATION_FAILED', { email, reason: 'Email already exists' });
+      return res.status(409).json({ error: 'Email already registered' });
     }
   }
 
-  if (!userId) {
-    // Auto-create if doesn't exist (demo mode)
-    userId = `user_${uuidv4().substring(0, 8)}`;
+  try {
+    const userId = `user_${uuidv4().substring(0, 8)}`;
+    const hashedPassword = await bcrypt.hash(password, 10);
+
     users.set(userId, {
       id: userId,
-      username: 'Miner',
+      username: username || 'User',
       email,
-      wallet_address: '',
+      passwordHash: hashedPassword,
+      wallet_address: wallet_address || '',
       created_at: new Date().toISOString()
     });
+
     settings.set(userId, {
       battery_optimization: true,
       low_power_mode: false,
       push_notifications: true,
       selected_coin: 'DOGE'
     });
-  }
 
-  res.json({
-    success: true,
-    userId,
-    message: '✅ Logged in successfully'
-  });
+    const token = jwt.sign({ userId, email }, JWT_SECRET, { expiresIn: '30d' });
+    logAudit(userId, 'USER_REGISTERED', { email });
+
+    res.json({
+      success: true,
+      userId,
+      token,
+      message: '✅ Registration successful! Ready to mine 24/7'
+    });
+  } catch (error) {
+    console.error('Registration error:', error);
+    res.status(500).json({ error: 'Registration failed' });
+  }
 });
 
-// Start Mining
-app.post('/api/mining/start', (req, res) => {
-  const { userId, coin } = req.body;
+// Login User (with password verification)
+app.post('/api/auth/login', authLimiter, async (req, res) => {
+  const { email, password } = req.body;
+
+  if (!email || !password) {
+    return res.status(400).json({ error: 'Email and password required' });
+  }
+
+  let userId = null;
+  let user = null;
+  for (const [id, userData] of users.entries()) {
+    if (userData.email === email) {
+      userId = id;
+      user = userData;
+      break;
+    }
+  }
+
+  if (!user) {
+    logAudit('unknown', 'LOGIN_FAILED', { email, reason: 'User not found' });
+    return res.status(401).json({ error: 'Invalid email or password' });
+  }
+
+  try {
+    // Verify password
+    const passwordMatch = await bcrypt.compare(password, user.passwordHash || '');
+    if (!passwordMatch) {
+      logAudit(userId, 'LOGIN_FAILED', { email, reason: 'Invalid password' });
+      return res.status(401).json({ error: 'Invalid email or password' });
+    }
+
+    const token = jwt.sign({ userId, email }, JWT_SECRET, { expiresIn: '30d' });
+    logAudit(userId, 'USER_LOGIN', { email });
+
+    res.json({
+      success: true,
+      userId,
+      token,
+      message: '✅ Logged in successfully'
+    });
+  } catch (error) {
+    console.error('Login error:', error);
+    res.status(500).json({ error: 'Login failed' });
+  }
+});
+
+// Start Mining (requires authentication)
+app.post('/api/mining/start', verifyToken, (req, res) => {
+  const { coin } = req.body;
+  const userId = req.userId;
 
   if (!SUPPORTED_COINS[coin]) {
     return res.status(400).json({ error: 'Unsupported coin' });
@@ -147,6 +240,8 @@ app.post('/api/mining/start', (req, res) => {
     coins_mined: 0
   });
 
+  logAudit(userId, 'MINING_STARTED', { coin, sessionId });
+
   res.json({
     success: true,
     sessionId,
@@ -156,14 +251,16 @@ app.post('/api/mining/start', (req, res) => {
   });
 });
 
-// Stop Mining
-app.post('/api/mining/stop', (req, res) => {
+// Stop Mining (requires authentication)
+app.post('/api/mining/stop', verifyToken, (req, res) => {
   const { sessionId } = req.body;
+  const userId = req.userId;
 
   const session = sessions.get(sessionId);
   if (session) {
     session.status = 'stopped';
     session.end_time = new Date().toISOString();
+    logAudit(userId, 'MINING_STOPPED', { coin: session.coin, sessionId, duration: new Date(session.end_time) - new Date(session.start_time) });
   }
 
   res.json({
@@ -318,6 +415,23 @@ app.get('/api/history/:userId', (req, res) => {
   res.json(userEarnings.slice(-limit).reverse());
 });
 
+// Get Audit Log (for admin - requires auth)
+app.get('/api/audit-log', verifyToken, (req, res) => {
+  const { userId } = req;
+  const userLogs = [];
+
+  for (const [, log] of auditLog.entries()) {
+    if (log.userId === userId) {
+      userLogs.push(log);
+    }
+  }
+
+  res.json({
+    total: userLogs.length,
+    logs: userLogs.slice(-50).reverse() // Last 50 entries
+  });
+});
+
 // ============== WEBSOCKET LIVE UPDATES ==============
 
 const server = http.createServer(app);
@@ -389,16 +503,24 @@ setInterval(() => {
 server.listen(PORT, '0.0.0.0', () => {
   console.log(`
 ╔════════════════════════════════════════════════════╗
-║        🤖 RDCM MINING BOT - LIVE                  ║
+║        🤖 RDCM MINING BOT - LIVE (SECURE)         ║
 ║                                                    ║
 ║   🚀 Server Running on Port ${PORT}                   ║
 ║   🌍 Access at: http://localhost:${PORT}              ║
 ║                                                    ║
+║   🔒 SECURITY FEATURES ENABLED:                    ║
+║   ✓ JWT Token Authentication                      ║
+║   ✓ Password Hashing (bcrypt)                      ║
+║   ✓ Audit Logging                                  ║
+║   ✓ Rate Limiting (100 req/15min)                  ║
+║   ✓ Auth Rate Limiting (5 attempts/15min)          ║
+║   ✓ Input Validation                               ║
+║                                                    ║
 ║   📊 API Endpoints:                                ║
-║   POST   /api/auth/register                        ║
-║   POST   /api/auth/login                           ║
-║   POST   /api/mining/start                         ║
-║   POST   /api/mining/stop                          ║
+║   POST   /api/auth/register (password required)   ║
+║   POST   /api/auth/login (password required)      ║
+║   POST   /api/mining/start (auth required)        ║
+║   POST   /api/mining/stop (auth required)         ║
 ║   GET    /api/mining/status/:userId                ║
 ║   GET    /api/earnings/stats/:userId               ║
 ║   GET    /api/wallet/:userId                       ║
