@@ -917,56 +917,44 @@
     </style>
 </head>
 <body>
-    <!-- LOGIN/REGISTER MODAL - HIDDEN FOR DEMO -->
-    <div class="auth-modal" id="authModal" style="display: none;">
+    <!-- LOGIN/REGISTER MODAL -->
+    <div class="auth-modal active" id="authModal">
         <div class="auth-container">
             <div class="auth-header">
-                <div class="auth-title" id="authTitle">🔐 Login</div>
-                <div class="auth-subtitle">Secure access to your mining account</div>
+                <div class="auth-title" id="authTitle">🔐 Login to RDCM Mining Bot</div>
+                <div class="auth-subtitle">Choose login type below</div>
             </div>
 
             <div id="errorMessage"></div>
 
+            <!-- LOGIN TYPE SELECTOR -->
+            <div style="display: flex; gap: 10px; margin-bottom: 20px;">
+                <button type="button" class="auth-button" id="btnOwner" onclick="selectLoginType('owner')" style="flex: 1; background: #ff6b6b;">👑 Owner</button>
+                <button type="button" class="auth-button" id="btnClient" onclick="selectLoginType('client')" style="flex: 1; background: #4CAF50;">👤 User</button>
+            </div>
+
             <form class="auth-form" id="authForm">
-                <!-- EMAIL -->
-                <div class="form-group">
-                    <label class="form-label">📧 Email Address</label>
-                    <input type="email" class="form-input" id="authEmail" placeholder="your@email.com" required>
-                    <div class="form-help">We'll use this to secure your account</div>
-                </div>
-
-                <!-- PASSWORD -->
-                <div class="form-group">
-                    <label class="form-label">🔑 Password</label>
-                    <input type="password" class="form-input" id="authPassword" placeholder="Min 6 characters" required>
-                    <div class="form-help">Create a strong password for security</div>
-                </div>
-
-                <!-- WALLET ADDRESS (Registration Only) -->
-                <div class="form-group" id="walletGroup" style="display: none;">
-                    <label class="form-label">💰 Unmineable Wallet Address</label>
-                    <input type="text" class="form-input" id="authWallet" placeholder="um_xxx or your wallet">
-                    <div class="form-help">
-                        <strong>Get your address:</strong><br>
-                        • Visit <a href="https://unmineable.com" target="_blank" style="color: #00d9ff; text-decoration: underline;">unmineable.com</a><br>
-                        • Pick any coin (DOGE, BTC, ETH, LTC, ZEC, XMR, RVN, ETC)<br>
-                        • Enter your crypto wallet address<br>
-                        • Get your Unmineable ID (starts with "um_")
+                <!-- OWNER LOGIN -->
+                <div id="ownerLogin" style="display: none;">
+                    <div class="form-group">
+                        <label class="form-label">📧 Owner Email</label>
+                        <input type="email" class="form-input" id="ownerEmail" placeholder="admin@rdcm.bot">
                     </div>
-                </div>
-
-                <!-- UNMINEABLE INFO BOX -->
-                <div class="info-section" id="unmiableInfo" style="display: none; margin-bottom: 15px;">
-                    <div class="info-title">🔗 What is Unmineable?</div>
-                    <div class="info-text">
-                        Unmineable is a mining pool that pays you directly to your wallet. They handle all mining complexity. We integrate with their API to show your real earnings and automate payouts.
+                    <div class="form-group">
+                        <label class="form-label">🔑 Password</label>
+                        <input type="password" class="form-input" id="ownerPassword" placeholder="Owner password">
                     </div>
+                    <button type="submit" class="auth-button" style="background: #ff6b6b;">Login as Owner</button>
                 </div>
 
-                <button type="submit" class="auth-button" id="authSubmitBtn">Login</button>
-
-                <div class="auth-toggle">
-                    New user? <a onclick="toggleAuthMode()">Create Account</a>
+                <!-- CLIENT LOGIN -->
+                <div id="clientLogin" style="display: block;">
+                    <div class="form-group">
+                        <label class="form-label">👤 Username</label>
+                        <input type="text" class="form-input" id="clientUsername" placeholder="Choose any username" required>
+                        <div class="form-help">Just a username, no password needed</div>
+                    </div>
+                    <button type="submit" class="auth-button" style="background: #4CAF50;">Start Mining</button>
                 </div>
             </form>
 
@@ -1234,68 +1222,67 @@
             document.getElementById('errorMessage').innerHTML = '';
         }
 
+        let currentLoginType = 'client'; // 'client' or 'owner'
+
+        function selectLoginType(type) {
+            currentLoginType = type;
+            document.getElementById('ownerLogin').style.display = type === 'owner' ? 'block' : 'none';
+            document.getElementById('clientLogin').style.display = type === 'client' ? 'block' : 'none';
+            document.getElementById('btnOwner').style.opacity = type === 'owner' ? '1' : '0.5';
+            document.getElementById('btnClient').style.opacity = type === 'client' ? '1' : '0.5';
+            document.getElementById('authForm').reset();
+        }
+
         async function handleAuthSubmit(e) {
             e.preventDefault();
-
-            const email = document.getElementById('authEmail').value;
-            const password = document.getElementById('authPassword').value;
-            const wallet = document.getElementById('authWallet').value;
             const errorDiv = document.getElementById('errorMessage');
-
             errorDiv.innerHTML = '';
 
             try {
-                if (isRegisterMode) {
-                    if (!wallet) {
-                        errorDiv.innerHTML = '<div class="error-message">❌ Wallet address is required. Get it from unmineable.com</div>';
-                        return;
+                if (currentLoginType === 'owner') {
+                    // Owner login with email + password
+                    const email = document.getElementById('ownerEmail').value;
+                    const password = document.getElementById('ownerPassword').value;
+
+                    // Simple owner check (in real app, verify against secure DB)
+                    if (email === 'admin@rdcm.bot' && password === 'rdcm2026') {
+                        const userId = 'owner_admin';
+                        const token = 'owner_token_' + Math.random().toString(36).substring(7);
+                        localStorage.setItem('userId', userId);
+                        localStorage.setItem('token', token);
+                        localStorage.setItem('isOwner', 'true');
+                        currentUser = { userId, token, isOwner: true };
+                        document.getElementById('authModal').classList.remove('active');
+                        document.getElementById('dashboardContainer').style.display = 'block';
+                    } else {
+                        errorDiv.innerHTML = '<div class="error-message">❌ Invalid owner credentials</div>';
                     }
-
-                    const response = await fetch('/api/auth/register', {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ email, password, wallet_address: wallet })
-                    });
-
-                    const data = await response.json();
-
-                    if (!response.ok) {
-                        errorDiv.innerHTML = `<div class="error-message">❌ ${data.error}</div>`;
-                        return;
-                    }
-
-                    localStorage.setItem('userId', data.userId);
-                    localStorage.setItem('token', data.token);
-                    currentUser = { userId: data.userId, token: data.token };
-                    api.token = data.token;
-
-                    document.getElementById('authModal').classList.remove('active');
-                    document.getElementById('dashboardContainer').style.display = 'block';
-                    document.getElementById('authForm').reset();
-
                 } else {
-                    const response = await fetch('/api/auth/login', {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ email, password })
-                    });
+                    // Client login with just username
+                    const username = document.getElementById('clientUsername').value.trim();
 
-                    const data = await response.json();
-
-                    if (!response.ok) {
-                        errorDiv.innerHTML = `<div class="error-message">❌ ${data.error}</div>`;
+                    if (!username) {
+                        errorDiv.innerHTML = '<div class="error-message">❌ Please enter a username</div>';
                         return;
                     }
 
-                    localStorage.setItem('userId', data.userId);
-                    localStorage.setItem('token', data.token);
-                    currentUser = { userId: data.userId, token: data.token };
-                    api.token = data.token;
+                    // Create client user (no password needed)
+                    const userId = 'user_' + username + '_' + Date.now();
+                    const token = 'user_token_' + Math.random().toString(36).substring(7);
+                    localStorage.setItem('userId', userId);
+                    localStorage.setItem('token', token);
+                    localStorage.setItem('username', username);
+                    localStorage.setItem('isOwner', 'false');
+                    currentUser = { userId, token, username, isOwner: false };
 
                     document.getElementById('authModal').classList.remove('active');
                     document.getElementById('dashboardContainer').style.display = 'block';
-                    document.getElementById('authForm').reset();
                 }
+
+                if (api) api.token = currentUser.token;
+                document.getElementById('authForm').reset();
+                selectLoginType('client'); // Reset to client login
+
             } catch (error) {
                 errorDiv.innerHTML = `<div class="error-message">❌ Error: ${error.message}</div>`;
             }
