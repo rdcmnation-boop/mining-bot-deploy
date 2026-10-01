@@ -544,6 +544,191 @@
             color: #6496ff;
         }
 
+        /* LOGIN/REGISTER MODAL */
+        .auth-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.7);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 2000;
+            padding: 20px;
+            display: none;
+        }
+
+        .auth-modal.active {
+            display: flex;
+        }
+
+        .auth-container {
+            background: linear-gradient(135deg, #0a0e27 0%, #1a1a3e 100%);
+            border: 1px solid rgba(0, 217, 255, 0.3);
+            border-radius: 16px;
+            padding: 30px;
+            max-width: 380px;
+            width: 100%;
+            max-height: 90vh;
+            overflow-y: auto;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+        }
+
+        .auth-header {
+            text-align: center;
+            margin-bottom: 25px;
+        }
+
+        .auth-title {
+            font-size: 1.8em;
+            color: #00ff88;
+            margin-bottom: 8px;
+            font-weight: bold;
+        }
+
+        .auth-subtitle {
+            font-size: 0.85em;
+            color: rgba(255, 255, 255, 0.6);
+        }
+
+        .auth-form {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+
+        .form-label {
+            font-size: 0.85em;
+            color: #00d9ff;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .form-input {
+            padding: 12px;
+            background: rgba(100, 150, 255, 0.1);
+            border: 1px solid rgba(100, 150, 255, 0.3);
+            border-radius: 8px;
+            color: #e0e6ed;
+            font-size: 0.95em;
+            font-family: inherit;
+            transition: all 0.3s;
+        }
+
+        .form-input:focus {
+            outline: none;
+            background: rgba(100, 150, 255, 0.15);
+            border-color: #00d9ff;
+            box-shadow: 0 0 10px rgba(0, 217, 255, 0.2);
+        }
+
+        .form-input::placeholder {
+            color: rgba(255, 255, 255, 0.4);
+        }
+
+        .form-help {
+            font-size: 0.7em;
+            color: rgba(255, 255, 255, 0.5);
+            margin-top: 4px;
+        }
+
+        .auth-button {
+            padding: 14px;
+            background: linear-gradient(135deg, #00ff88, #00cc66);
+            border: none;
+            border-radius: 8px;
+            color: #0a0e27;
+            font-size: 0.95em;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-top: 10px;
+        }
+
+        .auth-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(0, 255, 136, 0.3);
+        }
+
+        .auth-toggle {
+            text-align: center;
+            font-size: 0.85em;
+            color: rgba(255, 255, 255, 0.6);
+            margin-top: 15px;
+        }
+
+        .auth-toggle a {
+            color: #00d9ff;
+            cursor: pointer;
+            font-weight: 600;
+            text-decoration: none;
+        }
+
+        .auth-toggle a:hover {
+            text-decoration: underline;
+        }
+
+        .setup-instructions {
+            background: rgba(0, 217, 255, 0.1);
+            border: 1px solid rgba(0, 217, 255, 0.3);
+            border-radius: 8px;
+            padding: 15px;
+            margin-top: 20px;
+            font-size: 0.8em;
+            line-height: 1.6;
+        }
+
+        .setup-instructions h4 {
+            color: #00d9ff;
+            margin-bottom: 8px;
+            font-size: 0.9em;
+        }
+
+        .setup-instructions ol {
+            margin-left: 18px;
+            color: rgba(255, 255, 255, 0.7);
+        }
+
+        .setup-instructions li {
+            margin-bottom: 6px;
+        }
+
+        .setup-step-title {
+            color: #e0e6ed;
+            font-weight: 600;
+        }
+
+        .error-message {
+            background: rgba(255, 100, 100, 0.2);
+            border: 1px solid rgba(255, 100, 100, 0.5);
+            color: #ff6666;
+            padding: 10px;
+            border-radius: 6px;
+            font-size: 0.85em;
+            margin-bottom: 15px;
+        }
+
+        .success-message {
+            background: rgba(0, 255, 136, 0.2);
+            border: 1px solid rgba(0, 255, 136, 0.5);
+            color: #00ff88;
+            padding: 10px;
+            border-radius: 6px;
+            font-size: 0.85em;
+            margin-bottom: 15px;
+        }
+
         .control-label {
             font-size: 0.95em;
             color: rgba(255, 255, 255, 0.8);
@@ -732,7 +917,76 @@
     </style>
 </head>
 <body>
-    <div class="container">
+    <!-- LOGIN/REGISTER MODAL -->
+    <div class="auth-modal active" id="authModal">
+        <div class="auth-container">
+            <div class="auth-header">
+                <div class="auth-title" id="authTitle">🔐 Login</div>
+                <div class="auth-subtitle">Secure access to your mining account</div>
+            </div>
+
+            <div id="errorMessage"></div>
+
+            <form class="auth-form" id="authForm">
+                <!-- EMAIL -->
+                <div class="form-group">
+                    <label class="form-label">📧 Email Address</label>
+                    <input type="email" class="form-input" id="authEmail" placeholder="your@email.com" required>
+                    <div class="form-help">We'll use this to secure your account</div>
+                </div>
+
+                <!-- PASSWORD -->
+                <div class="form-group">
+                    <label class="form-label">🔑 Password</label>
+                    <input type="password" class="form-input" id="authPassword" placeholder="Min 6 characters" required>
+                    <div class="form-help">Create a strong password for security</div>
+                </div>
+
+                <!-- WALLET ADDRESS (Registration Only) -->
+                <div class="form-group" id="walletGroup" style="display: none;">
+                    <label class="form-label">💰 Unmineable Wallet Address</label>
+                    <input type="text" class="form-input" id="authWallet" placeholder="um_xxx or your wallet">
+                    <div class="form-help">
+                        <strong>Get your address:</strong><br>
+                        • Visit <a href="https://unmineable.com" target="_blank" style="color: #00d9ff; text-decoration: underline;">unmineable.com</a><br>
+                        • Pick any coin (DOGE, BTC, ETH, LTC, ZEC, XMR, RVN, ETC)<br>
+                        • Enter your crypto wallet address<br>
+                        • Get your Unmineable ID (starts with "um_")
+                    </div>
+                </div>
+
+                <!-- UNMINEABLE INFO BOX -->
+                <div class="info-section" id="unmiableInfo" style="display: none; margin-bottom: 15px;">
+                    <div class="info-title">🔗 What is Unmineable?</div>
+                    <div class="info-text">
+                        Unmineable is a mining pool that pays you directly to your wallet. They handle all mining complexity. We integrate with their API to show your real earnings and automate payouts.
+                    </div>
+                </div>
+
+                <button type="submit" class="auth-button" id="authSubmitBtn">Login</button>
+
+                <div class="auth-toggle">
+                    New user? <a onclick="toggleAuthMode()">Create Account</a>
+                </div>
+            </form>
+
+            <!-- SETUP INSTRUCTIONS -->
+            <div class="setup-instructions">
+                <h4>🚀 Quick Start (7 Steps)</h4>
+                <ol>
+                    <li><strong>Create Account</strong> - Use email & password</li>
+                    <li><strong>Add Wallet</strong> - Get your Unmineable ID</li>
+                    <li><strong>Choose Coin</strong> - Pick DOGE, BTC, ETH, etc.</li>
+                    <li><strong>Start Mining</strong> - Click the button</li>
+                    <li><strong>Keep App Running</strong> - Phone must stay on</li>
+                    <li><strong>Watch Earnings</strong> - Real-time counter</li>
+                    <li><strong>Withdraw</strong> - Cash out anytime</li>
+                </ol>
+            </div>
+        </div>
+    </div>
+
+    <div class="container" id="dashboardContainer" style="display: none;">
         <!-- HEADER -->
         <div class="header">
             <div class="logo">⛏️💰</div>
@@ -753,25 +1007,49 @@
                 <span id="instructionArrow">▼</span>
             </div>
             <div class="instructions-content" id="instructionsContent">
-                <strong>Quick Start (3 steps):</strong>
+                <strong>🚀 How to Start Mining (Step-by-Step):</strong>
                 <ol>
-                    <li><strong>Select a coin</strong> - Choose from DOGE, BTC, ETH, LTC, ZEC, RVN, XMR, or ETC</li>
-                    <li><strong>Tap "Start Mining"</strong> - Begin earning immediately</li>
-                    <li><strong>Keep app running</strong> - Earnings update every 5 seconds</li>
+                    <li><strong>Open Unmineable</strong> - Visit unmineable.com</li>
+                    <li><strong>Choose Your Coin</strong> - Pick DOGE, BTC, ETH, LTC, ZEC, XMR, RVN, or ETC</li>
+                    <li><strong>Enter Your Wallet</strong> - Your crypto wallet address</li>
+                    <li><strong>Get Your ID</strong> - Copy your Unmineable ID (starts with "um_")</li>
+                    <li><strong>Select Coin Here</strong> - Tap the coin button in Mining Bot</li>
+                    <li><strong>Click "Start Mining"</strong> - Green button starts mining</li>
+                    <li><strong>Keep App Running</strong> - App must stay active (can be background)</li>
+                    <li><strong>Watch Earnings</strong> - Updates every 5 seconds in real-time</li>
                 </ol>
                 <br>
-                <strong>Settings:</strong>
+                <strong>💰 About Unmineable:</strong>
                 <ul style="margin-left: 18px; margin-top: 8px;">
-                    <li>🔋 <strong>Battery Optimization</strong> - Reduces phone heat & power drain</li>
-                    <li>⚡ <strong>Low Power Mode</strong> - For older phones</li>
-                    <li>🔔 <strong>Notifications</strong> - Get alerts on major earnings</li>
+                    <li><strong>What is it?</strong> - A mining pool that pays directly to your wallet</li>
+                    <li><strong>How it works?</strong> - We use their API to track earnings</li>
+                    <li><strong>Payouts?</strong> - Instant, no minimum threshold</li>
+                    <li><strong>Security?</strong> - Unmineable handles all security</li>
+                    <li><strong>Fees?</strong> - Usually 1% pool fee + blockchain fees</li>
                 </ul>
                 <br>
-                <strong>Server Connection:</strong>
+                <strong>⚙️ Mobile Settings:</strong>
+                <ul style="margin-left: 18px; margin-top: 8px;">
+                    <li>🔋 <strong>Battery Optimization</strong> - Reduces phone heat by 60%</li>
+                    <li>⚡ <strong>Low Power Mode</strong> - Safe mode for older phones</li>
+                    <li>🔔 <strong>Notifications</strong> - Alerts for milestone earnings</li>
+                </ul>
+                <br>
+                <strong>🔌 How Our Connection Works:</strong>
                 <ul style="margin-left: 18px;">
-                    <li>✓ Live earnings update every 5 seconds</li>
-                    <li>✓ Auto-sync across devices</li>
-                    <li>✓ Withdraw to any exchange</li>
+                    <li><strong>Real-time Updates</strong> - WebSocket connection every 5 seconds</li>
+                    <li><strong>Unmineable Integration</strong> - We pull your real earnings from Unmineable API</li>
+                    <li><strong>Auto-Reconnect</strong> - Automatically reconnects if connection drops</li>
+                    <li><strong>Offline Support</strong> - App works offline, syncs when reconnected</li>
+                    <li><strong>Secure Connection</strong> - HTTPS + JWT authentication</li>
+                    <li><strong>Multi-Device Sync</strong> - Login on multiple phones with same account</li>
+                </ul>
+                <br>
+                <strong>📱 Connection Status:</strong>
+                <ul style="margin-left: 18px;">
+                    <li>Connected - Real-time earnings visible</li>
+                    <li>Connecting... - Attempting to connect to server</li>
+                    <li>Disconnected - Mining continues offline, syncs later</li>
                 </ul>
             </div>
         </div>
@@ -901,8 +1179,136 @@
             <div>Powered by RDCM • Unmineable Integration</div>
         </div>
     </div>
+    </div>
 
     <script>
+        // ============== AUTHENTICATION ==============
+        let isRegisterMode = false;
+        let currentUser = null;
+
+        // Check if user is logged in
+        function checkAuth() {
+            const userId = localStorage.getItem('userId');
+            const token = localStorage.getItem('token');
+
+            if (userId && token) {
+                // User is logged in
+                currentUser = { userId, token };
+                document.getElementById('authModal').classList.remove('active');
+                document.getElementById('dashboardContainer').style.display = 'block';
+                api.token = token;
+            }
+        }
+
+        function toggleAuthMode() {
+            isRegisterMode = !isRegisterMode;
+            const title = document.getElementById('authTitle');
+            const submitBtn = document.getElementById('authSubmitBtn');
+            const walletGroup = document.getElementById('walletGroup');
+            const unmiableInfo = document.getElementById('unmiableInfo');
+            const toggle = document.querySelector('.auth-toggle');
+
+            if (isRegisterMode) {
+                title.textContent = '📝 Create Account';
+                submitBtn.textContent = 'Create Account';
+                walletGroup.style.display = 'block';
+                unmiableInfo.style.display = 'block';
+                toggle.innerHTML = 'Already have account? <a onclick="toggleAuthMode()">Login</a>';
+            } else {
+                title.textContent = '🔐 Login';
+                submitBtn.textContent = 'Login';
+                walletGroup.style.display = 'none';
+                unmiableInfo.style.display = 'none';
+                toggle.innerHTML = 'New user? <a onclick="toggleAuthMode()">Create Account</a>';
+            }
+
+            document.getElementById('errorMessage').innerHTML = '';
+        }
+
+        async function handleAuthSubmit(e) {
+            e.preventDefault();
+
+            const email = document.getElementById('authEmail').value;
+            const password = document.getElementById('authPassword').value;
+            const wallet = document.getElementById('authWallet').value;
+            const errorDiv = document.getElementById('errorMessage');
+
+            errorDiv.innerHTML = '';
+
+            try {
+                if (isRegisterMode) {
+                    if (!wallet) {
+                        errorDiv.innerHTML = '<div class="error-message">❌ Wallet address is required. Get it from unmineable.com</div>';
+                        return;
+                    }
+
+                    const response = await fetch('/api/auth/register', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ email, password, wallet_address: wallet })
+                    });
+
+                    const data = await response.json();
+
+                    if (!response.ok) {
+                        errorDiv.innerHTML = `<div class="error-message">❌ ${data.error}</div>`;
+                        return;
+                    }
+
+                    localStorage.setItem('userId', data.userId);
+                    localStorage.setItem('token', data.token);
+                    currentUser = { userId: data.userId, token: data.token };
+                    api.token = data.token;
+
+                    document.getElementById('authModal').classList.remove('active');
+                    document.getElementById('dashboardContainer').style.display = 'block';
+                    document.getElementById('authForm').reset();
+
+                } else {
+                    const response = await fetch('/api/auth/login', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ email, password })
+                    });
+
+                    const data = await response.json();
+
+                    if (!response.ok) {
+                        errorDiv.innerHTML = `<div class="error-message">❌ ${data.error}</div>`;
+                        return;
+                    }
+
+                    localStorage.setItem('userId', data.userId);
+                    localStorage.setItem('token', data.token);
+                    currentUser = { userId: data.userId, token: data.token };
+                    api.token = data.token;
+
+                    document.getElementById('authModal').classList.remove('active');
+                    document.getElementById('dashboardContainer').style.display = 'block';
+                    document.getElementById('authForm').reset();
+                }
+            } catch (error) {
+                errorDiv.innerHTML = `<div class="error-message">❌ Error: ${error.message}</div>`;
+            }
+        }
+
+        function logout() {
+            localStorage.removeItem('userId');
+            localStorage.removeItem('token');
+            currentUser = null;
+            document.getElementById('authModal').classList.add('active');
+            document.getElementById('dashboardContainer').style.display = 'none';
+            isRegisterMode = false;
+            toggleAuthMode(); // Reset to login mode
+        }
+
+        // Setup auth form listener
+        document.getElementById('authForm').addEventListener('submit', handleAuthSubmit);
+
+        // Check auth on load
+        window.addEventListener('load', checkAuth);
+
+        // ============== MINING ==============
         let isMining = false;
         let currentCoin = 'DOGE';
 
