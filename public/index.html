@@ -1,0 +1,785 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RDCM Mining Bot - Phone Cryptocurrency Mining</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #0a0e27 0%, #1a1a3e 50%, #0f0e2e 100%);
+            color: #e0e6ed;
+            min-height: 100vh;
+            padding: 15px;
+        }
+
+        .container {
+            max-width: 480px;
+            margin: 0 auto;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 25px;
+            padding-top: 10px;
+        }
+
+        .logo {
+            font-size: 2.8em;
+            margin-bottom: 10px;
+        }
+
+        .title {
+            font-size: 1.6em;
+            color: #00ff88;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+
+        .subtitle {
+            font-size: 0.85em;
+            color: rgba(255, 255, 255, 0.6);
+        }
+
+        /* CONNECTION STATUS */
+        .connection-status {
+            background: rgba(0, 200, 100, 0.15);
+            border: 1px solid rgba(0, 200, 100, 0.5);
+            border-radius: 8px;
+            padding: 10px 12px;
+            margin-bottom: 15px;
+            font-size: 0.8em;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .status-dot {
+            width: 8px;
+            height: 8px;
+            background: #00ff88;
+            border-radius: 50%;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+
+        .status-dot.disconnected {
+            background: #ff6666;
+            animation: none;
+        }
+
+        /* HOW TO MINE SECTION */
+        .instructions-card {
+            background: rgba(100, 100, 200, 0.1);
+            border: 1px solid rgba(100, 150, 255, 0.3);
+            border-radius: 12px;
+            padding: 15px;
+            margin-bottom: 15px;
+            font-size: 0.85em;
+        }
+
+        .instructions-title {
+            color: #00ff88;
+            font-weight: bold;
+            margin-bottom: 10px;
+            cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .instructions-title:hover {
+            color: #00ffaa;
+        }
+
+        .instructions-content {
+            color: rgba(255, 255, 255, 0.8);
+            line-height: 1.5;
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.3s ease;
+        }
+
+        .instructions-content.show {
+            max-height: 300px;
+        }
+
+        .instructions-content ol {
+            margin-left: 18px;
+            margin-top: 8px;
+        }
+
+        .instructions-content li {
+            margin-bottom: 6px;
+        }
+
+        /* MINING STATUS CARD */
+        .mining-status {
+            background: linear-gradient(135deg, rgba(0, 255, 136, 0.15), rgba(100, 150, 255, 0.1));
+            border: 2px solid rgba(0, 255, 136, 0.4);
+            border-radius: 16px;
+            padding: 25px;
+            text-align: center;
+            margin-bottom: 20px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .mining-status::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            right: -50%;
+            width: 200px;
+            height: 200px;
+            background: radial-gradient(circle, rgba(0, 255, 136, 0.1), transparent);
+            border-radius: 50%;
+        }
+
+        .mining-status-content {
+            position: relative;
+            z-index: 1;
+        }
+
+        .status-label {
+            font-size: 0.85em;
+            color: rgba(255, 255, 255, 0.6);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 12px;
+            font-weight: 600;
+        }
+
+        .mining-amount {
+            font-size: 2.2em;
+            color: #00ff88;
+            font-weight: bold;
+            margin-bottom: 8px;
+            font-family: 'Courier New', monospace;
+        }
+
+        .coin-symbol {
+            font-size: 1.1em;
+            color: rgba(0, 255, 136, 0.8);
+            margin-bottom: 15px;
+        }
+
+        .mining-indicator {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            background: rgba(0, 255, 136, 0.15);
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-size: 0.85em;
+        }
+
+        .indicator-dot {
+            width: 10px;
+            height: 10px;
+            background: #00ff88;
+            border-radius: 50%;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; scale: 1; }
+            50% { opacity: 0.6; scale: 1.2; }
+        }
+
+        /* COIN SELECTOR */
+        .coin-selector {
+            background: rgba(10, 14, 39, 0.6);
+            border: 1px solid rgba(100, 150, 255, 0.2);
+            border-radius: 12px;
+            padding: 15px;
+            margin-bottom: 20px;
+        }
+
+        .section-label {
+            font-size: 0.85em;
+            color: #00d9ff;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 12px;
+            font-weight: 600;
+        }
+
+        .coin-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+        }
+
+        .coin-btn {
+            padding: 12px;
+            background: rgba(100, 150, 255, 0.1);
+            border: 1px solid rgba(100, 150, 255, 0.3);
+            border-radius: 8px;
+            color: #e0e6ed;
+            font-size: 0.85em;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            text-align: center;
+        }
+
+        .coin-btn:hover {
+            background: rgba(100, 150, 255, 0.2);
+            border-color: #00d9ff;
+        }
+
+        .coin-btn.active {
+            background: linear-gradient(135deg, #6496ff, #00d9ff);
+            border-color: #00ff88;
+            color: white;
+            box-shadow: 0 0 15px rgba(0, 217, 255, 0.4);
+        }
+
+        /* CONTROLS */
+        .controls {
+            background: rgba(10, 14, 39, 0.6);
+            border: 1px solid rgba(100, 150, 255, 0.2);
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+
+        .control-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px 0;
+            border-bottom: 1px solid rgba(100, 150, 255, 0.1);
+        }
+
+        .control-row:last-child {
+            border-bottom: none;
+        }
+
+        .control-label {
+            font-size: 0.95em;
+            color: rgba(255, 255, 255, 0.8);
+        }
+
+        .toggle {
+            width: 50px;
+            height: 28px;
+            background: rgba(100, 150, 255, 0.2);
+            border: 1px solid rgba(100, 150, 255, 0.4);
+            border-radius: 14px;
+            cursor: pointer;
+            position: relative;
+            transition: all 0.3s;
+        }
+
+        .toggle.active {
+            background: #00ff88;
+            border-color: #00ff88;
+        }
+
+        .toggle::after {
+            content: '';
+            position: absolute;
+            width: 24px;
+            height: 24px;
+            background: white;
+            border-radius: 50%;
+            top: 2px;
+            left: 2px;
+            transition: left 0.3s;
+        }
+
+        .toggle.active::after {
+            left: 24px;
+        }
+
+        /* MAIN ACTION BUTTON */
+        .btn-mining {
+            width: 100%;
+            padding: 16px;
+            background: linear-gradient(135deg, #00ff88, #6496ff);
+            border: none;
+            border-radius: 12px;
+            color: #0a0e27;
+            font-size: 1.1em;
+            font-weight: bold;
+            cursor: pointer;
+            margin-bottom: 15px;
+            transition: all 0.3s;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .btn-mining:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 12px 30px rgba(0, 255, 136, 0.3);
+        }
+
+        .btn-mining:active {
+            transform: translateY(-1px);
+        }
+
+        .btn-mining.mining {
+            background: linear-gradient(135deg, #ff4757, #ff006e);
+        }
+
+        /* STATS */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+            margin-bottom: 20px;
+        }
+
+        .stat-card {
+            background: rgba(10, 14, 39, 0.6);
+            border: 1px solid rgba(100, 150, 255, 0.2);
+            border-radius: 12px;
+            padding: 15px;
+            text-align: center;
+        }
+
+        .stat-icon {
+            font-size: 1.8em;
+            margin-bottom: 8px;
+        }
+
+        .stat-name {
+            font-size: 0.8em;
+            color: rgba(255, 255, 255, 0.6);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 6px;
+        }
+
+        .stat-value {
+            font-size: 1.4em;
+            color: #00d9ff;
+            font-weight: bold;
+            font-family: 'Courier New', monospace;
+        }
+
+        /* INFO BOX */
+        .info-section {
+            background: rgba(0, 217, 255, 0.05);
+            border: 1px solid rgba(0, 217, 255, 0.2);
+            border-radius: 12px;
+            padding: 15px;
+            margin-bottom: 20px;
+            font-size: 0.9em;
+            line-height: 1.6;
+        }
+
+        .info-title {
+            color: #00d9ff;
+            font-weight: 600;
+            margin-bottom: 8px;
+            font-size: 0.95em;
+        }
+
+        .info-text {
+            color: rgba(255, 255, 255, 0.8);
+            font-size: 0.85em;
+        }
+
+        /* SECONDARY BUTTONS */
+        .btn-group {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+            margin-bottom: 20px;
+        }
+
+        .btn-secondary {
+            padding: 12px;
+            background: transparent;
+            border: 1px solid rgba(100, 150, 255, 0.4);
+            border-radius: 8px;
+            color: #6496ff;
+            font-size: 0.9em;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .btn-secondary:hover {
+            background: rgba(100, 150, 255, 0.1);
+            border-color: #00d9ff;
+            color: #00d9ff;
+        }
+
+        /* FOOTER */
+        .footer {
+            text-align: center;
+            padding: 15px;
+            border-top: 1px solid rgba(100, 150, 255, 0.1);
+            color: rgba(255, 255, 255, 0.5);
+            font-size: 0.8em;
+        }
+
+        .verified-badge {
+            display: inline-block;
+            background: rgba(0, 255, 136, 0.2);
+            color: #00ff88;
+            padding: 4px 12px;
+            border-radius: 12px;
+            font-size: 0.75em;
+            margin-top: 8px;
+            font-weight: 600;
+        }
+
+        @media (max-width: 480px) {
+            .title {
+                font-size: 1.3em;
+            }
+
+            .mining-amount {
+                font-size: 1.8em;
+            }
+
+            .logo {
+                font-size: 2.3em;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- HEADER -->
+        <div class="header">
+            <div class="logo">⛏️💰</div>
+            <div class="title">Mining Bot</div>
+            <div class="subtitle">24/7 Mobile Cryptocurrency Mining</div>
+        </div>
+
+        <!-- CONNECTION STATUS -->
+        <div class="connection-status" id="connectionStatus">
+            <div class="status-dot" id="statusDot"></div>
+            <span id="connectionText">Connecting to server...</span>
+        </div>
+
+        <!-- HOW TO MINE INSTRUCTIONS -->
+        <div class="instructions-card">
+            <div class="instructions-title" onclick="toggleInstructions()">
+                📖 How to Mine (Tap to expand)
+                <span id="instructionArrow">▼</span>
+            </div>
+            <div class="instructions-content" id="instructionsContent">
+                <strong>Quick Start (3 steps):</strong>
+                <ol>
+                    <li><strong>Select a coin</strong> - Choose from DOGE, BTC, ETH, LTC, ZEC, RVN, XMR, or ETC</li>
+                    <li><strong>Tap "Start Mining"</strong> - Begin earning immediately</li>
+                    <li><strong>Keep app running</strong> - Earnings update every 5 seconds</li>
+                </ol>
+                <br>
+                <strong>Settings:</strong>
+                <ul style="margin-left: 18px; margin-top: 8px;">
+                    <li>🔋 <strong>Battery Optimization</strong> - Reduces phone heat & power drain</li>
+                    <li>⚡ <strong>Low Power Mode</strong> - For older phones</li>
+                    <li>🔔 <strong>Notifications</strong> - Get alerts on major earnings</li>
+                </ul>
+                <br>
+                <strong>Server Connection:</strong>
+                <ul style="margin-left: 18px;">
+                    <li>✓ Live earnings update every 5 seconds</li>
+                    <li>✓ Auto-sync across devices</li>
+                    <li>✓ Withdraw to any exchange</li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- MINING STATUS -->
+        <div class="mining-status">
+            <div class="mining-status-content">
+                <div class="status-label">Currently Mining</div>
+                <div class="mining-amount" id="miningAmount">0.0847</div>
+                <div class="coin-symbol" id="coinSymbol">DOGE Today</div>
+                <div class="mining-indicator">
+                    <div class="indicator-dot"></div>
+                    <span id="statusText">Mining Active</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- COIN SELECTOR -->
+        <div class="coin-selector">
+            <div class="section-label">📍 Select Coin</div>
+            <div class="coin-grid">
+                <button class="coin-btn active" onclick="selectCoin('DOGE', '🐕')">🐕 Dogecoin</button>
+                <button class="coin-btn" onclick="selectCoin('BTC', '₿')">₿ Bitcoin</button>
+                <button class="coin-btn" onclick="selectCoin('ETH', 'Ξ')">Ξ Ethereum</button>
+                <button class="coin-btn" onclick="selectCoin('LTC', 'Ł')">Ł Litecoin</button>
+                <button class="coin-btn" onclick="selectCoin('ZEC', '🔒')">🔒 Zcash</button>
+                <button class="coin-btn" onclick="selectCoin('RVN', '🐦')">🐦 Ravencoin</button>
+            </div>
+        </div>
+
+        <!-- CONTROLS -->
+        <div class="controls">
+            <div class="section-label">⚙️ Mining Settings</div>
+
+            <div class="control-row">
+                <span class="control-label">Battery Optimization</span>
+                <div class="toggle active" onclick="toggleBattery(this)"></div>
+            </div>
+
+            <div class="control-row">
+                <span class="control-label">Low Power Mode</span>
+                <div class="toggle" onclick="togglePowerMode(this)"></div>
+            </div>
+
+            <div class="control-row">
+                <span class="control-label">Push Notifications</span>
+                <div class="toggle active" onclick="toggleNotifications(this)"></div>
+            </div>
+        </div>
+
+        <!-- START/STOP MINING -->
+        <button class="btn-mining" id="miningBtn" onclick="toggleMining()">Start Mining</button>
+
+        <!-- STATS -->
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-icon">📊</div>
+                <div class="stat-name">Today's Earnings</div>
+                <div class="stat-value">$2.47</div>
+            </div>
+
+            <div class="stat-card">
+                <div class="stat-icon">⏱️</div>
+                <div class="stat-name">Mining Time</div>
+                <div class="stat-value">18h 42m</div>
+            </div>
+
+            <div class="stat-card">
+                <div class="stat-icon">📈</div>
+                <div class="stat-name">7-Day Total</div>
+                <div class="stat-value">$15.82</div>
+            </div>
+
+            <div class="stat-card">
+                <div class="stat-icon">💳</div>
+                <div class="stat-name">Wallet Balance</div>
+                <div class="stat-value">1.23 DOGE</div>
+            </div>
+        </div>
+
+        <!-- INFO SECTION -->
+        <div class="info-section">
+            <div class="info-title">✨ How RDCM Mining Works</div>
+            <div class="info-text">
+                1️⃣ <strong>Start Mining:</strong> Run mining bot on your phone<br>
+                2️⃣ <strong>Earn Daily:</strong> Accumulate cryptocurrency automatically<br>
+                3️⃣ <strong>No Fees:</strong> 100% of mined coins go to you<br>
+                4️⃣ <strong>24/7:</strong> Keep earning while you sleep
+            </div>
+            <div class="verified-badge">✓ Verified on Unmineable</div>
+        </div>
+
+        <!-- ACTION BUTTONS -->
+        <div class="btn-group">
+            <button class="btn-secondary" onclick="viewHistory()">📊 History</button>
+            <button class="btn-secondary" onclick="viewWallet()">💰 Wallet</button>
+        </div>
+
+        <div class="btn-group">
+            <button class="btn-secondary" onclick="viewSettings()">⚙️ Settings</button>
+            <button class="btn-secondary" onclick="viewSupport()">❓ Support</button>
+        </div>
+
+        <!-- FOOTER -->
+        <div class="footer">
+            <div style="margin-bottom: 10px;">🚀 Earning Cryptocurrency On Demand</div>
+            <div>Powered by RDCM • Unmineable Integration</div>
+        </div>
+    </div>
+
+    <script>
+        let isMining = false;
+        let currentCoin = 'DOGE';
+
+        function toggleMining() {
+            isMining = !isMining;
+            const btn = document.getElementById('miningBtn');
+            const status = document.getElementById('statusText');
+
+            if (isMining) {
+                btn.textContent = 'Stop Mining';
+                btn.classList.add('mining');
+                status.textContent = 'Mining Active ⚡';
+                alert(`⛏️ Mining ${currentCoin} started!\n\nKeep the app running to earn continuously.`);
+                simulateMiningProgress();
+            } else {
+                btn.textContent = 'Start Mining';
+                btn.classList.remove('mining');
+                status.textContent = 'Mining Paused';
+                alert(`⛏️ Mining paused\n\nYour earnings will be saved!`);
+            }
+        }
+
+        function selectCoin(coin, emoji) {
+            currentCoin = coin;
+            document.querySelectorAll('.coin-btn').forEach(btn => btn.classList.remove('active'));
+            event.target.classList.add('active');
+
+            document.getElementById('coinSymbol').textContent = `${coin} Today`;
+
+            if (isMining) {
+                alert(`🔄 Switched to ${emoji} ${coin}\n\nMining will continue on new coin.`);
+            } else {
+                alert(`✓ ${emoji} ${coin} selected\n\nPress "Start Mining" to begin.`);
+            }
+        }
+
+        function toggleBattery(element) {
+            element.classList.toggle('active');
+            const status = element.classList.contains('active') ? 'enabled' : 'disabled';
+            alert(`🔋 Battery optimization ${status}\n\nReduces phone heat and power usage.`);
+        }
+
+        function togglePowerMode(element) {
+            element.classList.toggle('active');
+            const status = element.classList.contains('active') ? 'enabled' : 'disabled';
+            alert(`⚡ Low power mode ${status}`);
+        }
+
+        function toggleNotifications(element) {
+            element.classList.toggle('active');
+            const status = element.classList.contains('active') ? 'enabled' : 'disabled';
+            alert(`🔔 Notifications ${status}`);
+        }
+
+        function viewHistory() {
+            alert(`📊 Mining History\n\nToday: 0.0847 DOGE ($2.47)\nYesterday: 0.0723 DOGE ($2.18)\nLast Week: 0.5612 DOGE ($16.84)\n\nAverage: $2.40/day`);
+        }
+
+        function viewWallet() {
+            alert(`💰 Wallet Balance\n\nCurrent: 1.23 ${currentCoin}\nValue: $36.90 USD\n\nMinimum to Withdraw: 0.10 ${currentCoin}\n\nYour Address:\n0x742d...3f89`);
+        }
+
+        function viewSettings() {
+            alert(`⚙️ Mining Settings\n\nCoin: ${currentCoin}\nMining Pool: Unmineable\nWorker ID: RDCM-001\nStatus: ${isMining ? 'ACTIVE' : 'INACTIVE'}\n\nUpdate wallet address in app.`);
+        }
+
+        function viewSupport() {
+            alert(`❓ Support & FAQ\n\nQ: Can I mine on multiple phones?\nA: Yes! Use same wallet address.\n\nQ: How fast is withdrawal?\nA: Instant to most exchanges.\n\nContact: support@rdcm.bot`);
+        }
+
+        function simulateMiningProgress() {
+            if (isMining) {
+                const amount = parseFloat(document.getElementById('miningAmount').textContent);
+                const newAmount = (amount + Math.random() * 0.001).toFixed(4);
+                document.getElementById('miningAmount').textContent = newAmount;
+                setTimeout(simulateMiningProgress, 5000);
+            }
+        }
+
+        // Toggle instructions section
+        function toggleInstructions() {
+            const content = document.getElementById('instructionsContent');
+            const arrow = document.getElementById('instructionArrow');
+            content.classList.toggle('show');
+            arrow.textContent = content.classList.contains('show') ? '▲' : '▼';
+        }
+
+        // Update connection status
+        function updateConnectionStatus(connected) {
+            const statusDot = document.getElementById('statusDot');
+            const statusText = document.getElementById('connectionText');
+            if (connected) {
+                statusDot.classList.remove('disconnected');
+                statusText.textContent = '✓ Connected to mining server';
+            } else {
+                statusDot.classList.add('disconnected');
+                statusText.textContent = '⚠ Connecting to server...';
+            }
+        }
+
+        // Simulate live stats updates
+        setInterval(() => {
+            if (isMining) {
+                const statValues = document.querySelectorAll('.stat-value');
+                // Update earnings (every 30 seconds adds ~$0.01)
+            }
+        }, 30000);
+    </script>
+    <script src="/api.js"></script>
+    <script>
+        // Initialize API on page load
+        let api = null;
+
+        window.addEventListener('load', async () => {
+            api = new MiningBotAPI();
+
+            // Auto-login if userId exists
+            if (api.userId) {
+                console.log('✅ User session restored:', api.userId);
+                connectLiveUpdates();
+            }
+        });
+
+        // Connect to live earnings updates
+        function connectLiveUpdates() {
+            if (!api || !api.userId) return;
+
+            api.connectLiveUpdates((data) => {
+                if (data.type === 'earnings_update') {
+                    const amount = parseFloat(document.getElementById('miningAmount').textContent);
+                    const newAmount = (amount + parseFloat(data.earnings)).toFixed(4);
+                    document.getElementById('miningAmount').textContent = newAmount;
+                }
+            });
+        }
+
+        // Override mining start with API call
+        const originalToggleMining = toggleMining;
+        window.toggleMining = async function(button) {
+            if (!api) {
+                alert('⚠️ Connection initializing... Please try again.');
+                return;
+            }
+
+            if (!api.userId) {
+                // Quick login
+                const email = prompt('📧 Enter your email to get started:');
+                if (!email) return;
+
+                const result = await api.login(email);
+                if (result.error) {
+                    alert('❌ ' + result.error);
+                    return;
+                }
+            }
+
+            if (!isMining) {
+                const result = await api.startMining(currentCoin);
+                if (result.error) {
+                    alert('❌ ' + result.error);
+                } else {
+                    isMining = true;
+                    button.textContent = '⏸️ Stop Mining';
+                    button.style.background = 'linear-gradient(135deg, #ff4444, #cc0000)';
+                    connectLiveUpdates();
+                }
+            } else {
+                const result = await api.stopMining();
+                if (result.error) {
+                    alert('❌ ' + result.error);
+                } else {
+                    isMining = false;
+                    button.textContent = '▶️ Start Mining';
+                    button.style.background = 'linear-gradient(135deg, #00ff88, #00cc66)';
+                    api.disconnectLiveUpdates();
+                }
+            }
+        };
+    </script>
+</body>
+</html>
