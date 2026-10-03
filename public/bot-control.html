@@ -351,6 +351,9 @@
   </div>
 
   <script>
+    // Production API endpoint
+    const API_BASE = 'https://rdcmnation-quantum-api.herokuapp.com';
+
     const token = localStorage.getItem('token');
     if (!token) window.location.href = '/index.html';
 
@@ -364,7 +367,7 @@
       const interval = document.getElementById(`${botType}-interval`).value;
 
       try {
-        const response = await fetch('/api/trading/start', {
+        const response = await fetch(`${API_BASE}/api/trading/start`, {
           method: 'POST',
           headers: {
             'Authorization': `Bearer ${token}`,
@@ -386,7 +389,7 @@
 
     async function stopBot(botType) {
       try {
-        const response = await fetch('/api/trading/stop', {
+        const response = await fetch(`${API_BASE}/api/trading/stop', {
           method: 'POST',
           headers: { 'Authorization': `Bearer ${token}` }
         });
@@ -453,7 +456,7 @@
     // Auto-fetch status periodically
     setInterval(async () => {
       try {
-        const response = await fetch('/api/trading/status', {
+        const response = await fetch(`${API_BASE}/api/trading/status', {
           headers: { 'Authorization': `Bearer ${token}` }
         });
         const data = await response.json();

@@ -170,6 +170,8 @@
     </div>
 
     <script>
+        // Production API endpoint
+        const API_BASE = 'https://rdcmnation-quantum-api.herokuapp.com';
         let isLoginMode = false;
 
         function showSignup() {
@@ -204,7 +206,7 @@
                 return;
             }
 
-            const endpoint = isLoginMode ? '/api/auth/login' : '/api/auth/register';
+            const endpoint = isLoginMode ? `${API_BASE}/api/auth/login` : `${API_BASE}/api/auth/register`;
             const body = isLoginMode ? { email, password } : { email, password, name };
 
             try {
