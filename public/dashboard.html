@@ -526,10 +526,37 @@
         </div>
     </div>
 
+    <!-- Bot Widget -->
+    <div id="botWidgetContainer"></div>
+
     <script src="api.js"></script>
+    <script src="bot.js"></script>
     <script>
         const api = new MiningBotAPI();
         let currentUser = null;
+
+        // Load bot widget
+        window.addEventListener('load', () => {
+            const container = document.getElementById('botWidgetContainer');
+            fetch('/bot-widget.html')
+                .then(r => r.text())
+                .then(html => {
+                    container.innerHTML = html;
+                })
+                .catch(() => {
+                    // Fallback - create minimal bot
+                    container.innerHTML = `
+                        <style>
+                            .bot-widget { position: fixed; bottom: 20px; right: 20px; z-index: 9999; }
+                            .bot-toggle { width: 60px; height: 60px; border-radius: 50%; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border: none; color: white; font-size: 28px; cursor: pointer; box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4); }
+                            .bot-toggle:hover { transform: scale(1.1); }
+                        </style>
+                        <div class="bot-widget">
+                            <button class="bot-toggle" onclick="alert('🤖 Bot: Hi! I can help you trade, check prices, and manage your portfolio.')">🤖</button>
+                        </div>
+                    `;
+                });
+        });
 
         // ============ INITIALIZATION ============
         async function init() {
