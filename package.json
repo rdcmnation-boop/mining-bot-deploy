@@ -1,16 +1,18 @@
 {
   "name": "rdcmnation-quantum",
-  "version": "2.0.0",
-  "description": "RDCMNATION QUANTUM - AI-Powered Stock & Crypto Trading Platform",
-  "main": "server-minimal.js",
+  "version": "2.1.0",
+  "description": "RDCMNATION QUANTUM - AI-Powered Stock & Crypto Trading Platform with Real Brokers",
+  "main": "server-with-brokers.js",
   "engines": {
     "node": "18.x"
   },
   "scripts": {
-    "start": "node server-minimal.js",
-    "dev": "node server-minimal.js"
+    "start": "node server-with-brokers.js",
+    "dev": "node server-with-brokers.js",
+    "start-minimal": "node server-minimal.js",
+    "start-production": "node server-production.js"
   },
-  "keywords": ["trading", "ai", "quantum", "stock", "crypto"],
+  "keywords": ["trading", "ai", "quantum", "stock", "crypto", "robinhood", "coinbase"],
   "author": "RDCM Nation",
   "license": "MIT",
   "dependencies": {}
