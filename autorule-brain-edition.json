@@ -1,0 +1,37 @@
+{
+ "product": "AutoRule AI Brain",
+ "edition": "2026-H2.2",
+ "brain_score": 52.75,
+ "next_edition": "2027-H1",
+ "created": "2026-09-30T16:41:03.373Z",
+ "lessons": 20000,
+ "model_lessons": 60000,
+ "accuracy": 0.851,
+ "files": [
+  {
+   "name": "autorule-brain.js",
+   "bytes": 10634,
+   "sha256": "e42d929845602418632833eddd8ef9cfcea662c44b494b5961c3ea41e44a3e9b"
+  },
+  {
+   "name": "brain-model.json",
+   "bytes": 162339,
+   "sha256": "9334cef7bd3fbe36c7068a920ae3254d1d1e8e1a3d6989ac027748fbad43acd9"
+  },
+  {
+   "name": "brain-lessons.json",
+   "bytes": 5501150,
+   "sha256": "f3285613843c3ae7a500fb63e67777f1e0b02b0bbd7de53da8bfb52b33f0ac9e"
+  },
+  {
+   "name": "README.md",
+   "bytes": 1749,
+   "sha256": "aa0d41890ee6ab738d267cd9c8d82d85717f3add10e3b317ec0d5ea121fddf02"
+  },
+  {
+   "name": "LICENSE.md",
+   "bytes": 502,
+   "sha256": "dfab19cacbca8be48ca355200e0f0ceb5819ade357544b50fdf4b55178258603"
+  }
+ ]
+}
