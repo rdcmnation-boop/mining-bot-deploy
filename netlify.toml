@@ -2,8 +2,7 @@
 # Netlify Configuration
 
 [build]
-  command = "npm install --legacy-peer-deps && npm run build:static"
-  functions = "functions"
+  command = "echo 'Static site ready'"
   publish = "public"
 
 [[redirects]]
