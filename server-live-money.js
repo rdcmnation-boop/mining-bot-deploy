@@ -15,6 +15,7 @@ const jwt = require('jsonwebtoken');
 const rateLimit = require('express-rate-limit');
 const { createPaymentIntent, setupBankTransfer, processApplePayment, getPaymentMethods } = require('./server-payments');
 const { runAutomationCycle, getMiningEarnings, convertToUSD, autoInvestInStocks, rebalancePortfolio, getPortfolioAnalytics } = require('./automation-phase4');
+const { getTechnicalIndicators, generateTradingSignal, getPortfolioSignals, executeSignalTrades, calculateTradingMetrics } = require('./trading-signals');
 
 const app = express();
 const PORT = process.env.PORT || 3001;
@@ -1170,6 +1171,119 @@ app.get('/api/automation/analytics', verifyToken, async (req, res) => {
     const result = await getPortfolioAnalytics(req.userId, robinhoodToken);
 
     res.json({ success: !!result, data: result });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// ==================== AI TRADING SIGNALS ====================
+
+/**
+ * Get trading signals for portfolio
+ */
+app.post('/api/trading/signals', verifyToken, async (req, res) => {
+  try {
+    const { symbols } = req.body;
+
+    if (!symbols || !Array.isArray(symbols)) {
+      return res.status(400).json({ error: 'Missing symbols array' });
+    }
+
+    const signals = await getPortfolioSignals(symbols);
+
+    res.json({
+      success: !!signals,
+      data: signals,
+      timestamp: new Date()
+    });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+/**
+ * Get signal for single stock
+ */
+app.get('/api/trading/signal/:symbol', verifyToken, async (req, res) => {
+  try {
+    const { symbol } = req.params;
+
+    if (!symbol) {
+      return res.status(400).json({ error: 'Missing symbol' });
+    }
+
+    const indicators = await getTechnicalIndicators(symbol);
+    const signal = await generateTradingSignal(symbol, indicators);
+
+    res.json({
+      success: true,
+      data: signal,
+      timestamp: new Date()
+    });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+/**
+ * Execute AI-generated trades
+ */
+app.post('/api/trading/execute-signals', verifyToken, async (req, res) => {
+  try {
+    const { symbols } = req.body;
+
+    if (!symbols || !Array.isArray(symbols)) {
+      return res.status(400).json({ error: 'Missing symbols array' });
+    }
+
+    // Get signals
+    const signals = await getPortfolioSignals(symbols);
+
+    // Get portfolio
+    const portfolio = await getRobinhoodPortfolio();
+
+    // Execute trades
+    const execution = await executeSignalTrades(signals, portfolio, robinhoodToken);
+
+    // Calculate metrics
+    const metrics = await calculateTradingMetrics(execution.trades, portfolio);
+
+    res.json({
+      success: true,
+      signals,
+      execution,
+      metrics,
+      timestamp: new Date()
+    });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+/**
+ * Get trading performance metrics
+ */
+app.get('/api/trading/metrics', verifyToken, async (req, res) => {
+  try {
+    const portfolio = await getRobinhoodPortfolio();
+    const analytics = await getPortfolioAnalytics(req.userId, robinhoodToken);
+
+    const metrics = {
+      portfolio: portfolio,
+      analytics: analytics,
+      tradingHealth: {
+        positions: portfolio?.positions?.length || 0,
+        value: analytics?.totalValue || 0,
+        gain: analytics?.gain || 0,
+        gainPercent: analytics?.gainPercent || 0
+      },
+      timestamp: new Date()
+    };
+
+    res.json({
+      success: true,
+      data: metrics
+    });
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
