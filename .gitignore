@@ -1,13 +1,29 @@
+# Database files (auto-generated)
+data/
+*.json
+
+# Dependencies
 node_modules/
-.env.local
-.DS_Store
-*.log
-npm-debug.log*
-.idea/
-.vscode/
-dist/
-build/
-*.swp
-*.swo
-*~
+package-lock.json
+
+# Environment
 .env
+.env.local
+
+# Logs
+*.log
+logs/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# IDE
+.vscode/
+.idea/
+*.swp
+
+# Runtime
+tmp/
+temp/
+.cache/
