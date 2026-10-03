@@ -8,7 +8,9 @@
     "start:legacy": "node server.js",
     "start:phase1": "node server-phase1-mining.js",
     "start:phase2": "node server-phase2-trading.js",
-    "dev": "nodemon server-live-money.js"
+    "dev": "nodemon server-live-money.js",
+    "build:static": "echo 'Frontend ready in public/'",
+    "build": "echo 'Build complete'"
   },
   "keywords": ["mining", "cryptocurrency", "blockchain", "unmineable", "mobile"],
   "author": "RDCM Nation",
