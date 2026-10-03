@@ -1,0 +1,513 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RDCM QUANTUM v2.1 - Live API Dashboard</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Courier New', monospace;
+            background: linear-gradient(135deg, #0a0e1a 0%, #1a1f3a 100%);
+            color: #0f0;
+            min-height: 100vh;
+            padding: 20px;
+            overflow-x: hidden;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+            border-bottom: 2px solid #0f0;
+            padding-bottom: 20px;
+        }
+
+        .header h1 {
+            font-size: 2.5em;
+            text-shadow: 0 0 20px #0f0;
+            margin-bottom: 10px;
+            animation: glow 2s ease-in-out infinite;
+        }
+
+        .status-bar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: rgba(0, 255, 0, 0.1);
+            border: 1px solid #0f0;
+            padding: 15px;
+            border-radius: 4px;
+            margin-bottom: 20px;
+        }
+
+        .api-status {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .status-dot {
+            display: inline-block;
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background: #0f0;
+            box-shadow: 0 0 10px #0f0;
+        }
+
+        .status-dot.offline {
+            background: #f00;
+            box-shadow: 0 0 10px #f00;
+        }
+
+        @keyframes glow {
+            0%, 100% { text-shadow: 0 0 20px #0f0; }
+            50% { text-shadow: 0 0 40px #0f0; }
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .card {
+            background: rgba(15, 20, 40, 0.8);
+            border: 2px solid #0f0;
+            border-radius: 8px;
+            padding: 20px;
+            backdrop-filter: blur(10px);
+            box-shadow: 0 0 20px rgba(0, 255, 0, 0.1);
+        }
+
+        .card h2 {
+            font-size: 1.3em;
+            margin-bottom: 15px;
+            color: #0ff;
+            border-bottom: 1px solid #0f0;
+            padding-bottom: 10px;
+        }
+
+        .stat {
+            display: flex;
+            justify-content: space-between;
+            padding: 8px 0;
+            border-bottom: 1px dashed #444;
+        }
+
+        .stat:last-child {
+            border-bottom: none;
+        }
+
+        .stat-label {
+            color: #888;
+        }
+
+        .stat-value {
+            color: #0f0;
+            font-weight: bold;
+        }
+
+        .section-title {
+            font-size: 1.4em;
+            color: #0ff;
+            margin: 30px 0 20px 0;
+            border-bottom: 2px solid #0f0;
+            padding-bottom: 10px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 10px;
+        }
+
+        table th {
+            background: rgba(0, 255, 0, 0.1);
+            border: 1px solid #0f0;
+            padding: 10px;
+            text-align: left;
+            color: #0ff;
+            font-weight: bold;
+        }
+
+        table td {
+            border: 1px solid #444;
+            padding: 10px;
+            color: #0f0;
+        }
+
+        table tr:hover {
+            background: rgba(0, 255, 0, 0.05);
+        }
+
+        .loading {
+            color: #888;
+            animation: pulse 1.5s ease-in-out infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+
+        .error {
+            background: rgba(255, 0, 0, 0.1);
+            border: 1px solid #f00;
+            color: #f00;
+            padding: 10px;
+            border-radius: 4px;
+            margin: 10px 0;
+        }
+
+        .success {
+            color: #0f0;
+        }
+
+        button {
+            background: linear-gradient(135deg, #0f0, #0c0);
+            color: #000;
+            border: 2px solid #0f0;
+            padding: 10px 20px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-family: 'Courier New', monospace;
+            font-weight: bold;
+            margin-top: 10px;
+        }
+
+        button:hover {
+            box-shadow: 0 0 20px #0f0;
+        }
+
+        .full-width {
+            grid-column: 1 / -1;
+        }
+
+        .api-endpoint {
+            background: rgba(0, 255, 200, 0.05);
+            border: 1px solid #0ff;
+            padding: 10px;
+            border-radius: 4px;
+            margin: 10px 0;
+            font-size: 0.9em;
+            word-break: break-all;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>🚀 RDCM QUANTUM v2.1</h1>
+        <p>Live API Dashboard - Real Data from Backend</p>
+    </div>
+
+    <div class="container">
+        <div class="status-bar">
+            <div class="api-status">
+                <span class="status-dot" id="statusDot"></span>
+                <span id="statusText">Connecting to API...</span>
+            </div>
+            <div style="color: #888; font-size: 0.9em;" id="apiUrl"></div>
+        </div>
+
+        <h2 class="section-title">🔧 Test Demo Data</h2>
+        <div class="card full-width">
+            <h2>API Connections</h2>
+            <p style="margin-bottom: 15px; color: #888;">Click to test real API endpoints:</p>
+            <button onclick="testHealthEndpoint()">Test Health Check</button>
+            <button onclick="testRegisterUser()">Register Test User</button>
+            <button onclick="testLoginUser()">Login & Get Token</button>
+            <button onclick="testConnectRobinhood()">Connect Robinhood (Mock)</button>
+            <button onclick="testGetPortfolio()">Fetch Live Portfolio</button>
+            <button onclick="testExecuteTrade()">Execute Live Trade</button>
+            <div id="apiResponse"></div>
+        </div>
+
+        <h2 class="section-title">📊 Live Data</h2>
+        <div class="grid">
+            <div class="card">
+                <h2>Health Status</h2>
+                <div id="healthData" class="loading">Fetching...</div>
+            </div>
+
+            <div class="card">
+                <h2>API Configuration</h2>
+                <div class="stat">
+                    <span class="stat-label">Base URL:</span>
+                    <span class="stat-value" id="baseUrl">localhost:3000</span>
+                </div>
+                <div class="stat">
+                    <span class="stat-label">Version:</span>
+                    <span class="stat-value" id="apiVersion">2.1.0</span>
+                </div>
+                <div class="stat">
+                    <span class="stat-label">Brokers:</span>
+                    <span class="stat-value" id="brokerCount">0</span>
+                </div>
+            </div>
+        </div>
+
+        <h2 class="section-title">📈 Available Endpoints</h2>
+        <div class="card full-width">
+            <h2>API Routes</h2>
+            <table>
+                <tr>
+                    <th>Endpoint</th>
+                    <th>Method</th>
+                    <th>Description</th>
+                </tr>
+                <tr>
+                    <td>/health</td>
+                    <td>GET</td>
+                    <td>Server health check</td>
+                </tr>
+                <tr>
+                    <td>/api/auth/register</td>
+                    <td>POST</td>
+                    <td>Register new user</td>
+                </tr>
+                <tr>
+                    <td>/api/auth/login</td>
+                    <td>POST</td>
+                    <td>User login</td>
+                </tr>
+                <tr>
+                    <td>/api/brokers/connect-robinhood</td>
+                    <td>POST</td>
+                    <td>Connect Robinhood account</td>
+                </tr>
+                <tr>
+                    <td>/api/brokers/connect-coinbase</td>
+                    <td>POST</td>
+                    <td>Connect Coinbase account</td>
+                </tr>
+                <tr>
+                    <td>/api/brokers/portfolio</td>
+                    <td>GET</td>
+                    <td>Get unified portfolio</td>
+                </tr>
+                <tr>
+                    <td>/api/trades/execute-live</td>
+                    <td>POST</td>
+                    <td>Execute live trade</td>
+                </tr>
+                <tr>
+                    <td>/api/trades/history</td>
+                    <td>GET</td>
+                    <td>Get trade history</td>
+                </tr>
+            </table>
+        </div>
+
+        <h2 class="section-title">🧪 Try It Out</h2>
+        <div class="card full-width">
+            <h2>Interactive Test Console</h2>
+            <p style="margin-bottom: 15px; color: #888;">Enter custom API requests:</p>
+            <div>
+                <input type="text" id="customEndpoint" placeholder="/api/auth/login" style="width: 100%; padding: 10px; background: #0a0e1a; color: #0f0; border: 1px solid #0f0; border-radius: 4px; margin-bottom: 10px; font-family: monospace;">
+                <textarea id="customBody" placeholder='{"email":"test@example.com","password":"test123"}' style="width: 100%; height: 100px; padding: 10px; background: #0a0e1a; color: #0f0; border: 1px solid #0f0; border-radius: 4px; margin-bottom: 10px; font-family: monospace; resize: vertical;"></textarea>
+                <button onclick="testCustomRequest()">Send Request</button>
+                <div id="customResponse"></div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Detect API URL
+        const API_BASE = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'
+            ? 'http://localhost:3000'
+            : window.location.origin;
+
+        let authToken = null;
+
+        function updateStatusBar() {
+            const statusDot = document.getElementById('statusDot');
+            const statusText = document.getElementById('statusText');
+            const apiUrl = document.getElementById('apiUrl');
+
+            apiUrl.textContent = `API: ${API_BASE}`;
+
+            fetch(`${API_BASE}/health`, { mode: 'cors' })
+                .then(r => r.json())
+                .then(data => {
+                    statusDot.classList.remove('offline');
+                    statusText.innerHTML = `<span class="success">✅ Connected</span> | ${data.service} v${data.version}`;
+
+                    document.getElementById('apiVersion').textContent = data.version;
+                    document.getElementById('brokerCount').textContent = data.brokers.length;
+
+                    displayJSON('healthData', data);
+                })
+                .catch(e => {
+                    statusDot.classList.add('offline');
+                    statusText.innerHTML = `<span style="color: #f00;">❌ Offline</span> | Cannot connect to API`;
+                    displayJSON('healthData', { error: e.message });
+                });
+        }
+
+        function displayJSON(elementId, data) {
+            document.getElementById(elementId).innerHTML = `<pre style="font-size: 0.85em; overflow-x: auto;">${JSON.stringify(data, null, 2)}</pre>`;
+        }
+
+        function testHealthEndpoint() {
+            fetch(`${API_BASE}/health`)
+                .then(r => r.json())
+                .then(data => {
+                    displayJSON('apiResponse', { status: 'success', endpoint: '/health', data });
+                })
+                .catch(e => displayJSON('apiResponse', { status: 'error', message: e.message }));
+        }
+
+        function testRegisterUser() {
+            const payload = {
+                email: 'demo' + Date.now() + '@test.com',
+                password: 'demo123',
+                name: 'Demo User'
+            };
+
+            fetch(`${API_BASE}/api/auth/register`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload)
+            })
+                .then(r => r.json())
+                .then(data => {
+                    if (data.token) authToken = data.token;
+                    displayJSON('apiResponse', { status: 'success', endpoint: '/api/auth/register', data });
+                })
+                .catch(e => displayJSON('apiResponse', { status: 'error', message: e.message }));
+        }
+
+        function testLoginUser() {
+            fetch(`${API_BASE}/api/auth/login`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    email: 'test@example.com',
+                    password: 'test123'
+                })
+            })
+                .then(r => r.json())
+                .then(data => {
+                    if (data.token) authToken = data.token;
+                    displayJSON('apiResponse', { status: 'success', endpoint: '/api/auth/login', data });
+                })
+                .catch(e => displayJSON('apiResponse', { status: 'error', message: e.message }));
+        }
+
+        function testConnectRobinhood() {
+            if (!authToken) {
+                displayJSON('apiResponse', { status: 'error', message: 'Login first to get token' });
+                return;
+            }
+
+            fetch(`${API_BASE}/api/brokers/connect-robinhood`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${authToken}`
+                },
+                body: JSON.stringify({
+                    username: 'test_robinhood_user',
+                    password: 'test_robinhood_pass',
+                    mfaToken: '123456'
+                })
+            })
+                .then(r => r.json())
+                .then(data => {
+                    displayJSON('apiResponse', { status: 'success', endpoint: '/api/brokers/connect-robinhood', data });
+                })
+                .catch(e => displayJSON('apiResponse', { status: 'error', message: e.message }));
+        }
+
+        function testGetPortfolio() {
+            if (!authToken) {
+                displayJSON('apiResponse', { status: 'error', message: 'Login first to get token' });
+                return;
+            }
+
+            fetch(`${API_BASE}/api/brokers/portfolio`, {
+                headers: { 'Authorization': `Bearer ${authToken}` }
+            })
+                .then(r => r.json())
+                .then(data => {
+                    displayJSON('apiResponse', { status: 'success', endpoint: '/api/brokers/portfolio', data });
+                })
+                .catch(e => displayJSON('apiResponse', { status: 'error', message: e.message }));
+        }
+
+        function testExecuteTrade() {
+            if (!authToken) {
+                displayJSON('apiResponse', { status: 'error', message: 'Login first to get token' });
+                return;
+            }
+
+            fetch(`${API_BASE}/api/trades/execute-live`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${authToken}`
+                },
+                body: JSON.stringify({
+                    assetType: 'stock',
+                    symbol: 'AAPL',
+                    quantity: 5,
+                    side: 'buy',
+                    price: 150.25
+                })
+            })
+                .then(r => r.json())
+                .then(data => {
+                    displayJSON('apiResponse', { status: 'success', endpoint: '/api/trades/execute-live', data });
+                })
+                .catch(e => displayJSON('apiResponse', { status: 'error', message: e.message }));
+        }
+
+        function testCustomRequest() {
+            const endpoint = document.getElementById('customEndpoint').value;
+            const body = document.getElementById('customBody').value;
+
+            try {
+                const options = {
+                    headers: { 'Content-Type': 'application/json' }
+                };
+
+                if (authToken) {
+                    options.headers['Authorization'] = `Bearer ${authToken}`;
+                }
+
+                if (body) {
+                    options.method = 'POST';
+                    options.body = body;
+                }
+
+                fetch(`${API_BASE}${endpoint}`, options)
+                    .then(r => r.json())
+                    .then(data => {
+                        displayJSON('customResponse', { status: 'success', endpoint, data });
+                    })
+                    .catch(e => displayJSON('customResponse', { status: 'error', message: e.message }));
+            } catch (e) {
+                displayJSON('customResponse', { status: 'error', message: e.message });
+            }
+        }
+
+        // Initialize on load
+        window.addEventListener('load', () => {
+            updateStatusBar();
+            setInterval(updateStatusBar, 5000); // Check every 5 seconds
+        });
+    </script>
+</body>
+</html>
