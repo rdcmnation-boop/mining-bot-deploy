@@ -16,6 +16,7 @@ const rateLimit = require('express-rate-limit');
 const { createPaymentIntent, setupBankTransfer, processApplePayment, getPaymentMethods } = require('./server-payments');
 const { runAutomationCycle, getMiningEarnings, convertToUSD, autoInvestInStocks, rebalancePortfolio, getPortfolioAnalytics } = require('./automation-phase4');
 const { getTechnicalIndicators, generateTradingSignal, getPortfolioSignals, executeSignalTrades, calculateTradingMetrics } = require('./trading-signals');
+const { analyzeMarketRegime, generateSmartSignal, executeSmartTrades, calculateRiskMetrics, runSmartTradingCycle } = require('./smart-trading-engine');
 
 const app = express();
 const PORT = process.env.PORT || 3001;
@@ -1283,6 +1284,154 @@ app.get('/api/trading/metrics', verifyToken, async (req, res) => {
     res.json({
       success: true,
       data: metrics
+    });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// ==================== SMART TRADING ENDPOINTS ====================
+
+/**
+ * Analyze market regime and conditions
+ */
+app.post('/api/trading/smart/regime', verifyToken, async (req, res) => {
+  try {
+    const { symbols } = req.body;
+
+    if (!symbols || !Array.isArray(symbols)) {
+      return res.status(400).json({ error: 'Missing symbols array' });
+    }
+
+    // Get technical indicators for all symbols
+    const indicators = {};
+    for (const symbol of symbols) {
+      indicators[symbol] = await getTechnicalIndicators(symbol);
+    }
+
+    const marketRegime = await analyzeMarketRegime(symbols, indicators);
+
+    res.json({
+      success: true,
+      marketRegime,
+      timestamp: new Date()
+    });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+/**
+ * Generate smart trading signals with risk management
+ */
+app.post('/api/trading/smart/signals', verifyToken, async (req, res) => {
+  try {
+    const { symbols } = req.body;
+
+    if (!symbols || !Array.isArray(symbols)) {
+      return res.status(400).json({ error: 'Missing symbols array' });
+    }
+
+    // Get portfolio for context
+    const portfolio = await getRobinhoodPortfolio();
+
+    // Get technical indicators
+    const indicators = {};
+    for (const symbol of symbols) {
+      indicators[symbol] = await getTechnicalIndicators(symbol);
+    }
+
+    // Analyze market regime
+    const marketRegime = await analyzeMarketRegime(symbols, indicators);
+
+    // Generate smart signals
+    const smartSignals = {};
+    for (const symbol of symbols) {
+      const signal = await generateSmartSignal(symbol, indicators[symbol], marketRegime, portfolio);
+      smartSignals[symbol] = signal;
+    }
+
+    res.json({
+      success: true,
+      signals: smartSignals,
+      marketRegime,
+      timestamp: new Date()
+    });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+/**
+ * Execute smart trades with risk management
+ */
+app.post('/api/trading/smart/execute', verifyToken, async (req, res) => {
+  try {
+    const { symbols } = req.body;
+
+    if (!symbols || !Array.isArray(symbols)) {
+      return res.status(400).json({ error: 'Missing symbols array' });
+    }
+
+    // Get portfolio
+    const portfolio = await getRobinhoodPortfolio();
+
+    // Get technical indicators
+    const indicators = {};
+    for (const symbol of symbols) {
+      indicators[symbol] = await getTechnicalIndicators(symbol);
+    }
+
+    // Analyze market regime
+    const marketRegime = await analyzeMarketRegime(symbols, indicators);
+
+    // Generate smart signals
+    const smartSignals = {};
+    for (const symbol of symbols) {
+      const signal = await generateSmartSignal(symbol, indicators[symbol], marketRegime, portfolio);
+      smartSignals[symbol] = signal;
+    }
+
+    // Execute smart trades
+    const execution = await executeSmartTrades(smartSignals, portfolio, robinhoodToken, marketRegime);
+
+    // Calculate risk metrics
+    const riskMetrics = calculateRiskMetrics(execution?.trades || [], portfolio);
+
+    res.json({
+      success: true,
+      signals: smartSignals,
+      execution,
+      riskMetrics,
+      marketRegime,
+      timestamp: new Date()
+    });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+/**
+ * Full smart trading cycle
+ */
+app.post('/api/trading/smart/cycle', verifyToken, async (req, res) => {
+  try {
+    const { symbols } = req.body;
+
+    if (!symbols || !Array.isArray(symbols)) {
+      return res.status(400).json({ error: 'Missing symbols array' });
+    }
+
+    // Get portfolio
+    const portfolio = await getRobinhoodPortfolio();
+
+    // Run full smart trading cycle
+    const result = await runSmartTradingCycle(symbols, {}, portfolio, robinhoodToken);
+
+    res.json({
+      success: result.success,
+      data: result,
+      timestamp: new Date()
     });
   } catch (error) {
     res.status(500).json({ error: error.message });
