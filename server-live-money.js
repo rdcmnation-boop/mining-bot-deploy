@@ -14,6 +14,7 @@ const { v4: uuidv4 } = require('uuid');
 const jwt = require('jsonwebtoken');
 const rateLimit = require('express-rate-limit');
 const { createPaymentIntent, setupBankTransfer, processApplePayment, getPaymentMethods } = require('./server-payments');
+const { runAutomationCycle, getMiningEarnings, convertToUSD, autoInvestInStocks, rebalancePortfolio, getPortfolioAnalytics } = require('./automation-phase4');
 
 const app = express();
 const PORT = process.env.PORT || 3001;
@@ -480,6 +481,12 @@ async function placeRobinhoodOrder(symbol, quantity, side, orderType = 'market')
       };
     }
 
+    // Get account and instrument URLs
+    const account = await getRobinhoodAccount();
+    const instrumentUrl = await getInstrumentUrl(symbol);
+
+    if (!account) throw new Error('Failed to get account');
+
     const response = await fetch(`${ROBINHOOD_API_BASE}/orders/`, {
       method: 'POST',
       headers: {
@@ -487,21 +494,54 @@ async function placeRobinhoodOrder(symbol, quantity, side, orderType = 'market')
         'Content-Type': 'application/json'
       },
       body: JSON.stringify({
-        account: '/accounts/default/',
-        instrument: symbol,
-        quantity,
-        side,
+        account: account.url || account,
+        instrument: instrumentUrl,
+        symbol: symbol,
+        quantity: parseInt(quantity),
+        side: side.toLowerCase(),
         type: orderType,
         time_in_force: 'gfd'
       })
     });
 
-    if (!response.ok) throw new Error(`Order failed: ${response.status}`);
+    if (!response.ok) {
+      const err = await response.text();
+      throw new Error(`Order failed: ${response.status} - ${err}`);
+    }
 
     return await response.json();
   } catch (error) {
     console.error('Order error:', error.message);
     return null;
+  }
+}
+
+/**
+ * Get Robinhood instrument by symbol
+ */
+async function getInstrumentUrl(symbol) {
+  try {
+    if (!robinhoodToken || Date.now() > robinhoodTokenExpiry) {
+      await authenticateRobinhood();
+    }
+
+    if (!robinhoodToken) {
+      return `${ROBINHOOD_API_BASE}/instruments/${symbol}/`;
+    }
+
+    const response = await fetch(`${ROBINHOOD_API_BASE}/instruments/?symbol=${symbol}`, {
+      headers: {
+        'Authorization': `Bearer ${robinhoodToken}`
+      }
+    });
+
+    if (!response.ok) throw new Error(`Instrument lookup failed: ${response.status}`);
+
+    const data = await response.json();
+    return data.results?.[0]?.url || `${ROBINHOOD_API_BASE}/instruments/${symbol}/`;
+  } catch (error) {
+    console.error('Instrument error:', error.message);
+    return `${ROBINHOOD_API_BASE}/instruments/${symbol}/`;
   }
 }
 
@@ -1003,6 +1043,133 @@ app.post('/api/trading/robinhood/order', verifyToken, async (req, res) => {
       transaction,
       order
     });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// ==================== PHASE 4: AUTOMATION ENDPOINTS ====================
+
+/**
+ * Run full automation cycle
+ */
+app.post('/api/automation/run', verifyToken, async (req, res) => {
+  try {
+    const userId = req.userId;
+    const user = users.get(userId);
+
+    if (!user) {
+      return res.status(404).json({ error: 'User not found' });
+    }
+
+    const automationConfig = {
+      unmiineableId: process.env.UNMINEABLE_API_KEY,
+      coinbaseApiKey: COINBASE_API_KEY,
+      coinbaseSecret: COINBASE_API_SECRET,
+      robinhoodToken: robinhoodToken,
+      strategy: req.body.strategy || 'balanced'
+    };
+
+    const result = await runAutomationCycle(userId, automationConfig);
+
+    res.json({
+      success: result.success,
+      data: result,
+      timestamp: new Date()
+    });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+/**
+ * Get mining earnings
+ */
+app.get('/api/automation/earnings', verifyToken, async (req, res) => {
+  try {
+    const earnings = await getMiningEarnings(req.userId, process.env.UNMINEABLE_API_KEY);
+    res.json({ success: !!earnings, data: earnings });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+/**
+ * Convert crypto to USD
+ */
+app.post('/api/automation/convert', verifyToken, async (req, res) => {
+  try {
+    const { amount, coin } = req.body;
+
+    if (!amount || !coin) {
+      return res.status(400).json({ error: 'Missing amount or coin' });
+    }
+
+    const result = await convertToUSD(
+      req.userId,
+      coin,
+      amount,
+      COINBASE_API_KEY,
+      COINBASE_API_SECRET
+    );
+
+    res.json({ success: !!result, data: result });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+/**
+ * Auto-invest in stocks
+ */
+app.post('/api/automation/invest', verifyToken, async (req, res) => {
+  try {
+    const { amount, strategy = 'balanced' } = req.body;
+
+    if (!amount || amount <= 0) {
+      return res.status(400).json({ error: 'Invalid amount' });
+    }
+
+    const result = await autoInvestInStocks(
+      req.userId,
+      amount,
+      robinhoodToken,
+      strategy
+    );
+
+    res.json({ success: !!result, data: result });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+/**
+ * Rebalance portfolio
+ */
+app.post('/api/automation/rebalance', verifyToken, async (req, res) => {
+  try {
+    const { allocation } = req.body;
+
+    if (!allocation) {
+      return res.status(400).json({ error: 'Missing allocation' });
+    }
+
+    const result = await rebalancePortfolio(req.userId, robinhoodToken, allocation);
+
+    res.json({ success: !!result, data: result });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+/**
+ * Get portfolio analytics
+ */
+app.get('/api/automation/analytics', verifyToken, async (req, res) => {
+  try {
+    const result = await getPortfolioAnalytics(req.userId, robinhoodToken);
+
+    res.json({ success: !!result, data: result });
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
