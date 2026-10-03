@@ -312,7 +312,7 @@
           <h3><span class="emoji">🧠</span>AI Brain Status</h3>
           <div class="value" id="brain-accuracy">85.1%</div>
           <div class="label">Classical Accuracy</div>
-          <div class="subvalue" id="brain-version">AutoRule 2026-H2.2</div>
+          <div class="subvalue" id="brain-version">RDCM Rules 2026-H2.2</div>
           <div style="margin-top: 10px;">
             <span class="agent-status agent-active">Active</span>
           </div>
@@ -589,7 +589,7 @@
 
         // Update brain status
         document.getElementById('brain-accuracy').textContent = `${(data.brainAccuracy * 100).toFixed(1)}%`;
-        document.getElementById('brain-version').textContent = data.quantum?.brainVersion || 'AutoRule 2026-H2.2';
+        document.getElementById('brain-version').textContent = data.quantum?.brainVersion || 'RDCM Rules 2026-H2.2';
 
         // Update mining
         document.getElementById('mining-balance').textContent = `$${(data.mining?.performance?.dailyEarnings || 0).toFixed(2)}`;

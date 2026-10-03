@@ -15,27 +15,27 @@
 └────────────────────────────────────────────────────────────────────────────┘
 
 ┌─ CORE COMPONENTS ─────────────────────────────────────────────────────────┐
-│ ✅ AutoRulesEngine (auto-rules-engine.js)                                 │
+│ ✅ RDCM RulessEngine (auto-rules-engine.js)                                 │
 │    - Create/manage/execute trading rules                                  │
 │    - Momentum scoring (0-100 scale)                                       │
 │    - Rule history tracking                                                │
 │    - Statistics & analytics                                               │
 │                                                                            │
-│ ✅ AutoRuleBrain (autorule-brain-integration.js)                          │
+│ ✅ RDCM RulesBrain (autorule-brain-integration.js)                          │
 │    - AI metrics & accuracy tracking                                       │
 │    - Mining performance analysis                                          │
 │    - Trade signal generation                                              │
 │    - Brain edition management                                             │
 │                                                                            │
 │ ✅ Production Server (server-with-brokers.js)                            │
-│    - All 10 AutoRule API endpoints integrated                             │
+│    - All 10 RDCM Rules API endpoints integrated                             │
 │    - Real broker integration (Robinhood + Coinbase)                       │
 │    - Dynamic routing for rule management                                  │
 │    - Full request handling                                                │
 └────────────────────────────────────────────────────────────────────────────┘
 
 ┌─ API ENDPOINTS (10 Total) ─────────────────────────────────────────────────┐
-│ POST   /api/rules/create                  Create new AutoRule             │
+│ POST   /api/rules/create                  Create new RDCM Rules             │
 │ GET    /api/rules?userId=<id>             Get all user rules              │
 │ GET    /api/rules/:ruleId                 Get specific rule                │
 │ PUT    /api/rules/:ruleId                 Update rule                     │
@@ -48,7 +48,7 @@
 └────────────────────────────────────────────────────────────────────────────┘
 
 ┌─ USER INTERFACES ─────────────────────────────────────────────────────────┐
-│ ✅ AutoRule Dashboard (public/autorule-dashboard.html)                    │
+│ ✅ RDCM Rules Dashboard (public/autorule-dashboard.html)                    │
 │    - Full rule management UI                                              │
 │    - Real-time stats display                                              │
 │    - Brain metrics visibility                                             │
@@ -73,7 +73,7 @@
 │    → Edition: 2026-H2.2
 │    → Accuracy: 85.1%
 │
-│ ✅ Create AutoRule Endpoint
+│ ✅ Create RDCM Rules Endpoint
 │    → Status: 201 CREATED
 │    → Rule Created: BTC Momentum Buy
 │    → Rule ID: rule_1791062747829

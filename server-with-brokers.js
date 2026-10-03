@@ -16,8 +16,8 @@ const path = require('path');
 const crypto = require('crypto');
 const { URL } = require('url');
 const { BrokerManager } = require('./broker-integration');
-const AutoRulesEngine = require('./auto-rules-engine');
-const AutoRuleBrain = require('./autorule-brain-integration');
+const RDCMRulesEngine = require('./auto-rules-engine');
+const RDCMBrain = require('./autorule-brain-integration');
 
 // CONFIG
 const CONFIG = {
@@ -154,8 +154,8 @@ class RequestHandler {
     this.pathname = this.url.pathname;
     this.db = new Database();
     this.brokerManager = new BrokerManager();
-    this.autoRulesEngine = new AutoRulesEngine();
-    this.autoRuleBrain = new AutoRuleBrain();
+    this.rdcmRulesEngine = new RDCMRulesEngine();
+    this.rdcmBrain = new RDCMBrain();
   }
 
   async handle() {
@@ -467,7 +467,7 @@ class RequestHandler {
     }
 
     try {
-      const rule = this.autoRulesEngine.createRule(userId, ruleName, conditions, action);
+      const rule = this.rdcmRulesEngine.createRule(userId, ruleName, conditions, action);
       return this.send(201, {
         success: true,
         rule,
@@ -486,7 +486,7 @@ class RequestHandler {
     }
 
     try {
-      const rules = this.autoRulesEngine.getUserRules(userId);
+      const rules = this.rdcmRulesEngine.getUserRules(userId);
       return this.send(200, {
         success: true,
         count: rules.length,
@@ -499,7 +499,7 @@ class RequestHandler {
 
   async getAutoRuleById(ruleId) {
     try {
-      const rule = this.autoRulesEngine.rules.find(r => r.id === ruleId);
+      const rule = this.rdcmRulesEngine.rules.find(r => r.id === ruleId);
       if (!rule) {
         return this.error(404, 'Rule not found');
       }
@@ -514,7 +514,7 @@ class RequestHandler {
     const body = await this.readBody();
 
     try {
-      const rule = this.autoRulesEngine.updateRule(ruleId, body);
+      const rule = this.rdcmRulesEngine.updateRule(ruleId, body);
       if (!rule) {
         return this.error(404, 'Rule not found');
       }
@@ -531,7 +531,7 @@ class RequestHandler {
 
   async deleteAutoRule(ruleId) {
     try {
-      const deleted = this.autoRulesEngine.deleteRule(ruleId);
+      const deleted = this.rdcmRulesEngine.deleteRule(ruleId);
       return this.send(200, {
         success: deleted,
         message: deleted ? '✅ AutoRule deleted successfully' : 'Rule not found'
@@ -546,7 +546,7 @@ class RequestHandler {
     const { enabled } = body;
 
     try {
-      const rule = this.autoRulesEngine.toggleRule(ruleId, enabled);
+      const rule = this.rdcmRulesEngine.toggleRule(ruleId, enabled);
       if (!rule) {
         return this.error(404, 'Rule not found');
       }
@@ -570,7 +570,7 @@ class RequestHandler {
     }
 
     try {
-      const executions = await this.autoRulesEngine.monitorRules(currentPrices);
+      const executions = await this.rdcmRulesEngine.monitorRules(currentPrices);
       return this.send(200, {
         success: true,
         executionCount: executions.length,
@@ -583,7 +583,7 @@ class RequestHandler {
 
   async getAutoRuleHistory(ruleId) {
     try {
-      const history = this.autoRulesEngine.getExecutionHistory(ruleId);
+      const history = this.rdcmRulesEngine.getExecutionHistory(ruleId);
       return this.send(200, {
         success: true,
         ruleId,
@@ -597,7 +597,7 @@ class RequestHandler {
 
   async getAutoRuleStats(userId) {
     try {
-      const stats = this.autoRulesEngine.getStats(userId);
+      const stats = this.rdcmRulesEngine.getStats(userId);
       return this.send(200, {
         success: true,
         userId,
@@ -610,7 +610,7 @@ class RequestHandler {
 
   async getBrainMetrics() {
     try {
-      const metrics = this.autoRuleBrain.getMetrics();
+      const metrics = this.rdcmBrain.getMetrics();
       return this.send(200, {
         success: true,
         brain: metrics
@@ -643,7 +643,7 @@ server.listen(CONFIG.PORT, () => {
   console.log(`
 ╔════════════════════════════════════════════════════════════════╗
 ║   🚀 RDCM QUANTUM v2.1 - QUANTUM AI BRAIN POWERED              ║
-║   AutoRule + Broker Integration + AI Momentum Trading          ║
+║   RDCM Rules + Broker Integration + AI Momentum Trading        ║
 ╚════════════════════════════════════════════════════════════════╝
 
 ✅ Robinhood Integration
@@ -656,7 +656,7 @@ server.listen(CONFIG.PORT, () => {
    - Real wallet management
    - Live order execution
 
-✅ AutoRule Quantum AI Brain
+✅ RDCM Rules Quantum AI Brain
    - Momentum scoring (0-100)
    - Rule creation & management
    - Automatic execution

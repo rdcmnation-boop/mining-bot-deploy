@@ -1,14 +1,14 @@
-// RDCM QUANTUM - Auto-Trading Rules Engine
+// RDCM QUANTUM - RDCM Rules Engine
 // Automatically execute trades based on user-defined rules
 
 const fs = require('fs');
 const path = require('path');
 
-class AutoRulesEngine {
+class RDCMRulesEngine {
     constructor() {
         this.dataDir = path.join(__dirname, 'data');
-        this.rulesFile = path.join(this.dataDir, 'autoRules.json');
-        this.ruleHistoryFile = path.join(this.dataDir, 'ruleHistory.json');
+        this.rulesFile = path.join(this.dataDir, 'rdcmRules.json');
+        this.ruleHistoryFile = path.join(this.dataDir, 'rdcmRuleHistory.json');
         this.activeRules = {};
         this.loadRules();
     }
@@ -201,4 +201,4 @@ class AutoRulesEngine {
     }
 }
 
-module.exports = AutoRulesEngine;
+module.exports = RDCMRulesEngine;

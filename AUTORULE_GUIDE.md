@@ -1,8 +1,8 @@
-# 🧠 AutoRule Quantum AI Brain - Complete Guide
+# 🧠 RDCM Rules Quantum AI Brain - Complete Guide
 
 ## Overview
 
-**AutoRule Quantum AI Brain** is an advanced automated trading system powered by machine learning (85.1% accuracy). It enables you to create, manage, and execute momentum-based trading rules with zero manual intervention.
+**RDCM Rules Quantum AI Brain** is an advanced automated trading system powered by machine learning (85.1% accuracy). It enables you to create, manage, and execute momentum-based trading rules with zero manual intervention.
 
 - **Edition**: 2026-H2.2
 - **Brain Score**: 52.75
@@ -28,7 +28,7 @@ Open your browser and navigate to:
 http://localhost:3000/public/autorule-dashboard.html
 ```
 
-### 2. Create Your First AutoRule
+### 2. Create Your First RDCM Rule
 
 1. **Rule Name**: Give your rule a name (e.g., "Bitcoin Momentum Buy")
 2. **Asset Symbol**: Enter the asset (BTC, ETH, AAPL, etc.)
@@ -39,7 +39,7 @@ http://localhost:3000/public/autorule-dashboard.html
 7. **Quantity**: Amount to trade
 8. **Limit Price**: Optional maximum price
 
-Click **Create AutoRule** to activate.
+Click **Create RDCM Rules** to activate.
 
 ### 3. Monitor Your Rules
 
@@ -66,7 +66,7 @@ Authorization: Bearer <token>
 
 ### Endpoints
 
-#### 1. Create AutoRule
+#### 1. Create RDCM Rules
 **POST** `/api/rules/create`
 
 ```json
@@ -214,7 +214,7 @@ Execute a price monitoring pass for all active rules:
 {
   "success": true,
   "brain": {
-    "product": "AutoRule AI Brain",
+    "product": "RDCM Rules AI Brain",
     "edition": "2026-H2.2",
     "brain_score": 52.75,
     "accuracy": 0.851,
@@ -365,9 +365,9 @@ For issues or feature requests:
   - Real-time monitoring
   - Full API support
 
-- **v2.0** - Initial AutoRule Release
+- **v2.0** - Initial RDCM Rules Release
 - **v1.0** - Basic trading functionality
 
 ---
 
-**Ready to trade with AI?** Open the dashboard and create your first AutoRule! 🚀
+**Ready to trade with AI?** Open the dashboard and create your first RDCM Rules! 🚀
