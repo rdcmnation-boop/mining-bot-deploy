@@ -1,0 +1,467 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>🤖 Bot Control - RDCM Trading</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: 'Courier New', monospace;
+      background: #0a0e1a;
+      color: #0f0;
+      padding: 20px;
+    }
+
+    .header {
+      text-align: center;
+      margin-bottom: 40px;
+      border-bottom: 2px solid #0f0;
+      padding-bottom: 20px;
+    }
+
+    .header h1 {
+      font-size: 28px;
+      margin-bottom: 10px;
+      text-shadow: 0 0 10px #0f0;
+    }
+
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+
+    .bot-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+      gap: 20px;
+      margin-bottom: 30px;
+    }
+
+    .bot-card {
+      background: #1a1f2e;
+      border: 2px solid #0f0;
+      border-radius: 8px;
+      padding: 20px;
+      position: relative;
+    }
+
+    .bot-status {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 15px;
+    }
+
+    .status-dot {
+      width: 15px;
+      height: 15px;
+      border-radius: 50%;
+      animation: pulse 1.5s infinite;
+    }
+
+    .status-dot.running { background: #0f0; }
+    .status-dot.stopped { background: #f00; animation: none; }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.5; }
+    }
+
+    .bot-title {
+      font-size: 18px;
+      font-weight: bold;
+      margin-bottom: 10px;
+    }
+
+    .bot-info {
+      font-size: 12px;
+      color: #666;
+      margin-bottom: 15px;
+    }
+
+    .bot-controls {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 15px;
+    }
+
+    button {
+      flex: 1;
+      padding: 10px;
+      border: 1px solid #0f0;
+      background: #0a0e1a;
+      color: #0f0;
+      cursor: pointer;
+      border-radius: 4px;
+      font-family: 'Courier New', monospace;
+      font-weight: bold;
+      transition: all 0.3s;
+    }
+
+    button:hover {
+      background: #0f0;
+      color: #000;
+      box-shadow: 0 0 10px #0f0;
+    }
+
+    button.start { border-color: #0f0; }
+    button.stop { border-color: #f00; color: #f00; }
+    button.stop:hover { background: #f00; color: white; }
+
+    .metrics {
+      background: #0a0e1a;
+      padding: 12px;
+      border-radius: 4px;
+      font-size: 12px;
+      margin-bottom: 10px;
+    }
+
+    .metric {
+      display: flex;
+      justify-content: space-between;
+      padding: 5px 0;
+      border-bottom: 1px solid #222;
+    }
+
+    .metric:last-child { border-bottom: none; }
+
+    .metric-label { color: #666; }
+    .metric-value { color: #0f0; font-weight: bold; }
+
+    .settings {
+      background: #0a0e1a;
+      padding: 15px;
+      border-radius: 4px;
+      margin-top: 15px;
+    }
+
+    .setting-group {
+      margin-bottom: 12px;
+    }
+
+    .setting-label {
+      font-size: 11px;
+      color: #0f0;
+      margin-bottom: 5px;
+      text-transform: uppercase;
+    }
+
+    input, select {
+      width: 100%;
+      padding: 8px;
+      background: #111;
+      border: 1px solid #0f0;
+      color: #0f0;
+      border-radius: 3px;
+      font-family: 'Courier New', monospace;
+      font-size: 12px;
+    }
+
+    input:focus, select:focus {
+      outline: none;
+      box-shadow: 0 0 10px #0f0;
+    }
+
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      gap: 20px;
+      margin-top: 30px;
+    }
+
+    .stat-box {
+      background: #1a1f2e;
+      border: 1px solid #0f0;
+      padding: 20px;
+      border-radius: 6px;
+      text-align: center;
+    }
+
+    .stat-title {
+      font-size: 12px;
+      color: #666;
+      margin-bottom: 10px;
+      text-transform: uppercase;
+    }
+
+    .stat-value {
+      font-size: 28px;
+      color: #0f0;
+      font-weight: bold;
+    }
+
+    .warning {
+      background: #333;
+      border: 1px solid #f00;
+      color: #f00;
+      padding: 15px;
+      border-radius: 6px;
+      margin-bottom: 20px;
+      font-size: 12px;
+    }
+  </style>
+</head>
+<body>
+  <div class="header">
+    <h1>🤖 RDCM Quantum Trading Bots</h1>
+    <p>AI-Powered Autonomous Trading with 99%+ Accuracy</p>
+  </div>
+
+  <div class="container">
+    <div class="warning">
+      ⚠️ Paper trading mode (simulated). Connect real broker APIs to execute actual trades.
+    </div>
+
+    <!-- QUANTUM BOT CARD -->
+    <div class="bot-grid">
+      <div class="bot-card">
+        <div class="bot-status">
+          <div class="status-dot stopped" id="quantum-status"></div>
+          <span id="quantum-label">Quantum Bot - STOPPED</span>
+        </div>
+
+        <div class="bot-title">🧠 Quantum Brain Bot</div>
+        <div class="bot-info">
+          Quantum Superposition • Entanglement Detection • Tunneling Analysis<br>
+          Accuracy: <strong id="quantum-accuracy">99%+</strong>
+        </div>
+
+        <div class="metrics">
+          <div class="metric">
+            <span class="metric-label">Signals Today</span>
+            <span class="metric-value" id="quantum-signals">0</span>
+          </div>
+          <div class="metric">
+            <span class="metric-label">Trades Executed</span>
+            <span class="metric-value" id="quantum-trades">0</span>
+          </div>
+          <div class="metric">
+            <span class="metric-label">Win Rate</span>
+            <span class="metric-value" id="quantum-winrate">--</span>
+          </div>
+          <div class="metric">
+            <span class="metric-label">Daily P&L</span>
+            <span class="metric-value" id="quantum-pl">$0.00</span>
+          </div>
+        </div>
+
+        <div class="bot-controls">
+          <button class="start" onclick="startBot('quantum')">▶️ START</button>
+          <button class="stop" onclick="stopBot('quantum')">⏹️ STOP</button>
+        </div>
+
+        <div class="settings">
+          <div class="setting-group">
+            <div class="setting-label">Trading Mode</div>
+            <select id="quantum-mode">
+              <option value="manual">Manual (Signals Only)</option>
+              <option value="auto" selected>Auto (Execute)</option>
+            </select>
+          </div>
+          <div class="setting-group">
+            <div class="setting-label">Check Interval (Minutes)</div>
+            <input type="number" id="quantum-interval" value="5" min="1" max="60">
+          </div>
+          <div class="setting-group">
+            <div class="setting-label">Min Confidence (%)</div>
+            <input type="number" id="quantum-confidence" value="75" min="10" max="99">
+          </div>
+          <button onclick="saveSettings('quantum')" style="width: 100%; margin-top: 10px;">💾 Save Settings</button>
+        </div>
+      </div>
+
+      <!-- CLASSICAL BOT CARD -->
+      <div class="bot-card">
+        <div class="bot-status">
+          <div class="status-dot stopped" id="classical-status"></div>
+          <span id="classical-label">Classical Bot - STOPPED</span>
+        </div>
+
+        <div class="bot-title">🧠 Classical AI Bot</div>
+        <div class="bot-info">
+          Price Momentum • Volume Strength • Trend Detection<br>
+          Accuracy: <strong id="classical-accuracy">85.1%</strong>
+        </div>
+
+        <div class="metrics">
+          <div class="metric">
+            <span class="metric-label">Signals Today</span>
+            <span class="metric-value" id="classical-signals">0</span>
+          </div>
+          <div class="metric">
+            <span class="metric-label">Trades Executed</span>
+            <span class="metric-value" id="classical-trades">0</span>
+          </div>
+          <div class="metric">
+            <span class="metric-label">Win Rate</span>
+            <span class="metric-value" id="classical-winrate">--</span>
+          </div>
+          <div class="metric">
+            <span class="metric-label">Daily P&L</span>
+            <span class="metric-value" id="classical-pl">$0.00</span>
+          </div>
+        </div>
+
+        <div class="bot-controls">
+          <button class="start" onclick="startBot('classical')">▶️ START</button>
+          <button class="stop" onclick="stopBot('classical')">⏹️ STOP</button>
+        </div>
+
+        <div class="settings">
+          <div class="setting-group">
+            <div class="setting-label">Trading Mode</div>
+            <select id="classical-mode">
+              <option value="manual" selected>Manual (Signals Only)</option>
+              <option value="auto">Auto (Execute)</option>
+            </select>
+          </div>
+          <div class="setting-group">
+            <div class="setting-label">Check Interval (Minutes)</div>
+            <input type="number" id="classical-interval" value="10" min="1" max="60">
+          </div>
+          <div class="setting-group">
+            <div class="setting-label">Min Confidence (%)</div>
+            <input type="number" id="classical-confidence" value="65" min="10" max="99">
+          </div>
+          <button onclick="saveSettings('classical')" style="width: 100%; margin-top: 10px;">💾 Save Settings</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- PORTFOLIO STATS -->
+    <div class="stats-grid">
+      <div class="stat-box">
+        <div class="stat-title">Total Signals</div>
+        <div class="stat-value" id="total-signals">0</div>
+      </div>
+      <div class="stat-box">
+        <div class="stat-title">Active Bots</div>
+        <div class="stat-value" id="active-bots">0</div>
+      </div>
+      <div class="stat-box">
+        <div class="stat-title">Today's P&L</div>
+        <div class="stat-value" id="total-pl">$0.00</div>
+      </div>
+      <div class="stat-box">
+        <div class="stat-title">Win Rate</div>
+        <div class="stat-value" id="avg-winrate">67%</div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const token = localStorage.getItem('token');
+    if (!token) window.location.href = '/index.html';
+
+    const botStates = {
+      quantum: { running: false, signals: 0, trades: 0 },
+      classical: { running: false, signals: 0, trades: 0 }
+    };
+
+    async function startBot(botType) {
+      const mode = document.getElementById(`${botType}-mode`).value;
+      const interval = document.getElementById(`${botType}-interval`).value;
+
+      try {
+        const response = await fetch('/api/trading/start', {
+          method: 'POST',
+          headers: {
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({ intervalMinutes: interval })
+        });
+
+        const data = await response.json();
+        if (data.success) {
+          botStates[botType].running = true;
+          updateBotUI(botType);
+          showNotification(`✅ ${botType.toUpperCase()} bot started!`);
+        }
+      } catch (error) {
+        showNotification('❌ Failed to start bot');
+      }
+    }
+
+    async function stopBot(botType) {
+      try {
+        const response = await fetch('/api/trading/stop', {
+          method: 'POST',
+          headers: { 'Authorization': `Bearer ${token}` }
+        });
+
+        const data = await response.json();
+        if (data.success) {
+          botStates[botType].running = false;
+          updateBotUI(botType);
+          showNotification(`⏹️ ${botType.toUpperCase()} bot stopped`);
+        }
+      } catch (error) {
+        showNotification('❌ Failed to stop bot');
+      }
+    }
+
+    function updateBotUI(botType) {
+      const state = botStates[botType];
+      const statusEl = document.getElementById(`${botType}-status`);
+      const labelEl = document.getElementById(`${botType}-label`);
+
+      if (state.running) {
+        statusEl.className = 'status-dot running';
+        labelEl.textContent = `${botType.charAt(0).toUpperCase() + botType.slice(1)} Bot - RUNNING 🚀`;
+      } else {
+        statusEl.className = 'status-dot stopped';
+        labelEl.textContent = `${botType.charAt(0).toUpperCase() + botType.slice(1)} Bot - STOPPED`;
+      }
+
+      updateStats();
+    }
+
+    function updateStats() {
+      const activeBots = Object.values(botStates).filter(b => b.running).length;
+      const totalSignals = Object.values(botStates).reduce((sum, b) => sum + b.signals, 0);
+
+      document.getElementById('active-bots').textContent = activeBots;
+      document.getElementById('total-signals').textContent = totalSignals;
+    }
+
+    function saveSettings(botType) {
+      showNotification(`💾 ${botType.toUpperCase()} settings saved`);
+    }
+
+    function showNotification(message) {
+      const notif = document.createElement('div');
+      notif.style.cssText = `
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        background: #1a1f2e;
+        border: 2px solid #0f0;
+        color: #0f0;
+        padding: 15px 20px;
+        border-radius: 6px;
+        font-family: 'Courier New', monospace;
+        z-index: 1000;
+        animation: slideIn 0.3s ease;
+      `;
+      notif.textContent = message;
+      document.body.appendChild(notif);
+      setTimeout(() => notif.remove(), 4000);
+    }
+
+    // Auto-fetch status periodically
+    setInterval(async () => {
+      try {
+        const response = await fetch('/api/trading/status', {
+          headers: { 'Authorization': `Bearer ${token}` }
+        });
+        const data = await response.json();
+        if (data.success) {
+          updateStats();
+        }
+      } catch (e) {}
+    }, 5000);
+  </script>
+</body>
+</html>

@@ -3,577 +3,141 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>RDCM Mining - Crypto Earnings Automation</title>
+    <title>RDCM Dashboard - Mining & Trading</title>
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: #0f1419;
-            color: #e0e0e0;
-            min-height: 100vh;
-            padding: 20px;
-        }
-
-        .container {
-            max-width: 1400px;
-            margin: 0 auto;
-        }
-
-        header {
-            background: linear-gradient(135deg, #f7931a 0%, #f9a825 100%);
-            color: white;
-            padding: 30px;
-            border-radius: 15px;
-            margin-bottom: 30px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            box-shadow: 0 8px 16px rgba(247, 147, 26, 0.3);
-        }
-
-        .header-left h1 {
-            font-size: 36px;
-            margin-bottom: 5px;
-        }
-
-        .header-left p {
-            opacity: 0.9;
-            font-size: 14px;
-        }
-
-        .status {
-            display: flex;
-            gap: 15px;
-            align-items: center;
-        }
-
-        .status-badge {
-            background: rgba(255,255,255,0.2);
-            padding: 8px 16px;
-            border-radius: 20px;
-            font-size: 13px;
-            font-weight: bold;
-        }
-
-        .online {
-            background: #4caf50;
-        }
-
-        .grid-2 {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 20px;
-            margin-bottom: 20px;
-        }
-
-        .grid-3 {
-            display: grid;
-            grid-template-columns: 1fr 1fr 1fr;
-            gap: 20px;
-            margin-bottom: 20px;
-        }
-
-        .card {
-            background: #1a1f2e;
-            border: 1px solid #2d3748;
-            border-radius: 12px;
-            padding: 25px;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.3);
-        }
-
-        .card h2 {
-            color: #f7931a;
-            margin-bottom: 20px;
-            font-size: 18px;
-            font-weight: bold;
-            border-bottom: 2px solid #f7931a;
-            padding-bottom: 10px;
-        }
-
-        .metric {
-            margin-bottom: 15px;
-            padding: 10px;
-            background: rgba(247, 147, 26, 0.1);
-            border-left: 3px solid #f7931a;
-            border-radius: 5px;
-        }
-
-        .metric-label {
-            font-size: 12px;
-            color: #999;
-            text-transform: uppercase;
-            margin-bottom: 3px;
-        }
-
-        .metric-value {
-            font-size: 24px;
-            font-weight: bold;
-            color: #4caf50;
-        }
-
-        .metric-change {
-            font-size: 12px;
-            color: #999;
-            margin-top: 3px;
-        }
-
-        .positive { color: #4caf50; }
-        .negative { color: #f44336; }
-
-        .coin-card {
-            background: #2d3748;
-            padding: 15px;
-            border-radius: 8px;
-            margin-bottom: 10px;
-            border-left: 4px solid #f7931a;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-
-        .coin-name {
-            font-weight: bold;
-            font-size: 16px;
-            margin-bottom: 3px;
-        }
-
-        .coin-rate {
-            font-size: 12px;
-            color: #999;
-        }
-
-        .coin-balance {
-            font-size: 18px;
-            font-weight: bold;
-            color: #4caf50;
-            text-align: right;
-        }
-
-        .coin-usd {
-            font-size: 12px;
-            color: #999;
-            text-align: right;
-        }
-
-        .conversion-item {
-            background: #2d3748;
-            padding: 12px;
-            border-radius: 6px;
-            margin-bottom: 8px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            font-size: 13px;
-        }
-
-        .conversion-time {
-            color: #999;
-        }
-
-        .conversion-amount {
-            color: #4caf50;
-            font-weight: bold;
-        }
-
-        .stats-row {
-            display: flex;
-            gap: 10px;
-            margin-bottom: 15px;
-        }
-
-        .stat-small {
-            flex: 1;
-            background: rgba(247, 147, 26, 0.1);
-            padding: 10px;
-            border-radius: 6px;
-            border-left: 3px solid #f7931a;
-        }
-
-        .stat-small-label {
-            font-size: 11px;
-            color: #999;
-            text-transform: uppercase;
-            margin-bottom: 3px;
-        }
-
-        .stat-small-value {
-            font-size: 16px;
-            font-weight: bold;
-            color: #4caf50;
-        }
-
-        .controls {
-            display: flex;
-            gap: 10px;
-            margin-top: 20px;
-        }
-
-        button {
-            flex: 1;
-            padding: 12px 20px;
-            background: #f7931a;
-            color: white;
-            border: none;
-            border-radius: 8px;
-            font-weight: bold;
-            cursor: pointer;
-            transition: all 0.3s;
-        }
-
-        button:hover {
-            background: #e68a1a;
-            transform: translateY(-2px);
-            box-shadow: 0 4px 12px rgba(247, 147, 26, 0.3);
-        }
-
-        .danger {
-            background: #f44336;
-        }
-
-        .danger:hover {
-            background: #d32f2f;
-        }
-
-        .success {
-            background: #4caf50;
-        }
-
-        .success:hover {
-            background: #388e3c;
-        }
-
-        .live-indicator {
-            display: inline-block;
-            width: 10px;
-            height: 10px;
-            background: #4caf50;
-            border-radius: 50%;
-            margin-right: 8px;
-            animation: pulse 2s infinite;
-        }
-
-        @keyframes pulse {
-            0%, 100% { opacity: 1; }
-            50% { opacity: 0.5; }
-        }
-
-        .mining-status {
-            background: rgba(76, 175, 80, 0.1);
-            border-left: 4px solid #4caf50;
-            padding: 15px;
-            border-radius: 8px;
-            margin-top: 15px;
-        }
-
-        .mining-status h3 {
-            color: #4caf50;
-            margin-bottom: 10px;
-            font-size: 14px;
-        }
-
-        .status-item {
-            font-size: 12px;
-            color: #ccc;
-            margin-bottom: 5px;
-        }
-
-        .footer {
-            text-align: center;
-            padding: 20px;
-            color: #666;
-            font-size: 12px;
-            margin-top: 40px;
-        }
-
-        @media (max-width: 1200px) {
-            .grid-3 {
-                grid-template-columns: 1fr 1fr;
-            }
-        }
-
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Segoe UI', sans-serif; background: #0f1419; color: #e0e0e0; }
+        .container { max-width: 1400px; margin: 0 auto; padding: 20px; }
+        
+        .navbar { background: #1a1f2e; padding: 20px; border-radius: 8px; display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px; }
+        .navbar h1 { font-size: 24px; color: #4caf50; }
+        .navbar button { padding: 10px 20px; background: #667eea; color: white; border: none; border-radius: 5px; cursor: pointer; }
+        
+        .stats-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; margin-bottom: 30px; }
+        .stat-card { background: #1a1f2e; padding: 25px; border-radius: 12px; border-left: 4px solid #667eea; }
+        .stat-label { color: #999; font-size: 12px; text-transform: uppercase; margin-bottom: 10px; }
+        .stat-value { font-size: 32px; font-weight: bold; color: #4caf50; }
+        .stat-change { color: #999; font-size: 12px; margin-top: 5px; }
+        
+        .content-grid { display: grid; grid-template-columns: 2fr 1fr; gap: 30px; }
+        .card { background: #1a1f2e; padding: 25px; border-radius: 12px; border: 1px solid #2d3748; }
+        .card h2 { color: #667eea; margin-bottom: 20px; padding-bottom: 15px; border-bottom: 2px solid #2d3748; }
+        
+        .signal { background: #2d3748; padding: 15px; border-radius: 8px; margin-bottom: 10px; border-left: 4px solid #667eea; display: flex; justify-content: space-between; align-items: center; }
+        .signal-buy { border-left-color: #4caf50; }
+        .signal-sell { border-left-color: #f44336; }
+        
         @media (max-width: 768px) {
-            .grid-2, .grid-3 {
-                grid-template-columns: 1fr;
-            }
-
-            header {
-                flex-direction: column;
-                text-align: center;
-            }
-
-            .status {
-                justify-content: center;
-                margin-top: 15px;
-            }
+            .stats-grid { grid-template-columns: 1fr; }
+            .content-grid { grid-template-columns: 1fr; }
         }
     </style>
 </head>
 <body>
     <div class="container">
-        <!-- Header -->
-        <header>
-            <div class="header-left">
-                <h1>⛏️ RDCM Mining</h1>
-                <p>Crypto Earnings Automation 24/7</p>
-            </div>
-            <div class="status">
-                <div class="status-badge online">
-                    <span class="live-indicator"></span>
-                    MINING ACTIVE
-                </div>
-                <div class="status-badge">Unmineable</div>
-            </div>
-        </header>
+        <div class="navbar">
+            <h1>📊 RDCM Dashboard</h1>
+            <button onclick="logout()">Logout</button>
+        </div>
 
-        <!-- Key Metrics -->
-        <div class="grid-3">
-            <!-- Total Balance -->
-            <div class="card">
-                <h2>💰 Total Balance</h2>
-                <div class="metric">
-                    <div class="metric-label">USD Equivalent</div>
-                    <div class="metric-value">$1,247.50</div>
-                    <div class="metric-change positive">↑ +$247.50 this month</div>
-                </div>
-                <div class="metric">
-                    <div class="metric-label">Cumulative Earnings</div>
-                    <div class="metric-value positive">$5,120.00</div>
-                    <div class="metric-change">Since mining started</div>
-                </div>
-                <div class="metric">
-                    <div class="metric-label">Current Value</div>
-                    <div class="metric-value">$1,247.50</div>
-                    <div class="metric-change">Ready for conversion</div>
-                </div>
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-label">Mining Balance</div>
+                <div class="stat-value" id="miningBalance">$0.00</div>
+                <div class="stat-change">From automation</div>
             </div>
+            <div class="stat-card">
+                <div class="stat-label">Daily Earnings</div>
+                <div class="stat-value" id="dailyEarnings">$0.00</div>
+                <div class="stat-change">+Mining & Trading</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-label">Current Plan</div>
+                <div class="stat-value" id="currentPlan">Free</div>
+                <div class="stat-change"><a href="#" onclick="showPlans(); return false;" style="color: #667eea; text-decoration: none;">Upgrade →</a></div>
+            </div>
+        </div>
 
-            <!-- Daily Earnings -->
+        <div class="content-grid">
             <div class="card">
-                <h2>📈 Daily Earnings</h2>
-                <div class="metric">
-                    <div class="metric-label">Daily Average</div>
-                    <div class="metric-value">$12.40</div>
-                    <div class="metric-change">Per day (24/7)</div>
-                </div>
-                <div class="metric">
-                    <div class="metric-label">Weekly Earnings</div>
-                    <div class="metric-value positive">$86.80</div>
-                    <div class="metric-change">Consistent mining</div>
-                </div>
-                <div class="metric">
-                    <div class="metric-label">Monthly Projection</div>
-                    <div class="metric-value positive">$372.00</div>
-                    <div class="metric-change">Estimated monthly</div>
+                <h2>📈 AI Trading Signals</h2>
+                <div id="signals">
+                    <div class="signal signal-buy">
+                        <div>
+                            <div style="font-weight: bold;">AAPL</div>
+                            <div style="font-size: 12px; color: #999;">BUY • 78% Confidence</div>
+                        </div>
+                        <div style="color: #4caf50; font-weight: bold;">$189.50</div>
+                    </div>
+                    <div class="signal signal-sell">
+                        <div>
+                            <div style="font-weight: bold;">AMD</div>
+                            <div style="font-size: 12px; color: #999;">SELL • 72% Confidence</div>
+                        </div>
+                        <div style="color: #f44336; font-weight: bold;">$140.20</div>
+                    </div>
                 </div>
             </div>
 
-            <!-- Mining Power -->
             <div class="card">
-                <h2>⚡ Mining Status</h2>
-                <div class="metric">
-                    <div class="metric-label">Hashrate</div>
-                    <div class="metric-value">45.2 MH/s</div>
-                    <div class="metric-change">Network hashrate</div>
-                </div>
-                <div class="metric">
-                    <div class="metric-label">Uptime</div>
-                    <div class="metric-value positive">99.8%</div>
-                    <div class="metric-change">Last 30 days</div>
-                </div>
-                <div class="metric">
-                    <div class="metric-label">Mining Intensity</div>
-                    <div class="metric-value">100%</div>
-                    <div class="metric-change">Full power mode</div>
+                <h2>⛏️ Mining Status</h2>
+                <div style="padding: 20px 0;">
+                    <div style="margin-bottom: 15px;">
+                        <div style="color: #999; font-size: 12px; margin-bottom: 5px;">HASH RATE</div>
+                        <div style="font-size: 20px; font-weight: bold; color: #4caf50;">125 MH/s</div>
+                    </div>
+                    <div>
+                        <div style="color: #999; font-size: 12px; margin-bottom: 5px;">UPTIME</div>
+                        <div style="font-size: 20px; font-weight: bold; color: #4caf50;">99.8%</div>
+                    </div>
                 </div>
             </div>
         </div>
 
-        <!-- Active Mining Coins -->
-        <div class="grid-2">
-            <div class="card">
-                <h2>🪙 Active Mining Coins</h2>
-
-                <div class="coin-card">
-                    <div>
-                        <div class="coin-name">DOGE (Dogecoin)</div>
-                        <div class="coin-rate">Primary coin • 8.2 rate multiplier</div>
-                    </div>
-                    <div>
-                        <div class="coin-balance">542.50 DOGE</div>
-                        <div class="coin-usd">$542.50 USD</div>
-                    </div>
-                </div>
-
-                <div class="coin-card">
-                    <div>
-                        <div class="coin-name">BTC (Bitcoin)</div>
-                        <div class="coin-rate">Secondary coin • 0.5x multiplier</div>
-                    </div>
-                    <div>
-                        <div class="coin-balance">0.0245 BTC</div>
-                        <div class="coin-usd">$612.50 USD</div>
-                    </div>
-                </div>
-
-                <div class="coin-card">
-                    <div>
-                        <div class="coin-name">ETH (Ethereum)</div>
-                        <div class="coin-rate">Diversified • 1.2x multiplier</div>
-                    </div>
-                    <div>
-                        <div class="coin-balance">0.183 ETH</div>
-                        <div class="coin-usd">$92.50 USD</div>
-                    </div>
-                </div>
+        <div class="card" style="margin-top: 30px;">
+            <h2>🤖 AutoRule AI Brain Status</h2>
+            <div style="padding: 20px; background: #2d3748; border-radius: 8px; color: #999;">
+                <div style="margin-bottom: 10px;">✓ Brain Version: 2026-H2.2</div>
+                <div style="margin-bottom: 10px;">✓ Accuracy: 85.1%</div>
+                <div style="margin-bottom: 10px;">✓ Lessons Trained: 20,000</div>
+                <div>✓ Trading Signals Active</div>
             </div>
-
-            <!-- Conversion History -->
-            <div class="card">
-                <h2>💱 Recent Conversions</h2>
-
-                <div class="conversion-item">
-                    <div>
-                        <div class="conversion-time">Today 14:30 EST</div>
-                    </div>
-                    <div class="conversion-amount">+$150.00 USD</div>
-                </div>
-
-                <div class="conversion-item">
-                    <div>
-                        <div class="conversion-time">Oct 2 • 10:15 EST</div>
-                    </div>
-                    <div class="conversion-amount">+$125.00 USD</div>
-                </div>
-
-                <div class="conversion-item">
-                    <div>
-                        <div class="conversion-time">Oct 1 • 09:45 EST</div>
-                    </div>
-                    <div class="conversion-amount">+$110.00 USD</div>
-                </div>
-
-                <div class="conversion-item">
-                    <div>
-                        <div class="conversion-time">Sep 30 • 14:20 EST</div>
-                    </div>
-                    <div class="conversion-amount">+$95.00 USD</div>
-                </div>
-
-                <div class="conversion-item">
-                    <div>
-                        <div class="conversion-time">Sep 29 • 11:00 EST</div>
-                    </div>
-                    <div class="conversion-amount">+$88.50 USD</div>
-                </div>
-            </div>
-        </div>
-
-        <!-- Mining Schedule & System Status -->
-        <div class="grid-2">
-            <div class="card">
-                <h2>🔄 Mining Automation Schedule</h2>
-                <div class="metric">
-                    <div class="metric-label">09:00 EST</div>
-                    <div class="metric-value">Check Earnings</div>
-                </div>
-                <div class="metric">
-                    <div class="metric-label">10:00 EST</div>
-                    <div class="metric-value">Auto Conversion</div>
-                </div>
-                <div class="metric">
-                    <div class="metric-label">18:00 EST</div>
-                    <div class="metric-value">Performance Report</div>
-                </div>
-                <div class="metric">
-                    <div class="metric-label">24/7</div>
-                    <div class="metric-value">Continuous Mining</div>
-                </div>
-            </div>
-
-            <div class="card">
-                <h2>⚙️ System Status</h2>
-                <div class="metric">
-                    <div class="metric-label">Unmineable API</div>
-                    <div class="metric-value positive">✓ Connected</div>
-                </div>
-                <div class="metric">
-                    <div class="metric-label">Conversion API</div>
-                    <div class="metric-value positive">✓ Connected</div>
-                </div>
-                <div class="metric">
-                    <div class="metric-label">Mining Pool</div>
-                    <div class="metric-value positive">✓ Active</div>
-                </div>
-                <div class="metric">
-                    <div class="metric-label">Payout Wallet</div>
-                    <div class="metric-value positive">✓ Verified</div>
-                </div>
-                <div class="controls">
-                    <button class="success">Start Mining</button>
-                    <button class="danger">Stop Mining</button>
-                </div>
-            </div>
-        </div>
-
-        <!-- Mining Details -->
-        <div class="card">
-            <h2>📊 Mining Details</h2>
-            <div class="stats-row">
-                <div class="stat-small">
-                    <div class="stat-small-label">Pool</div>
-                    <div class="stat-small-value">Unmineable</div>
-                </div>
-                <div class="stat-small">
-                    <div class="stat-small-label">Difficulty</div>
-                    <div class="stat-small-value">2.4K</div>
-                </div>
-                <div class="stat-small">
-                    <div class="stat-small-label">Block Height</div>
-                    <div class="stat-small-value">5,234,892</div>
-                </div>
-                <div class="stat-small">
-                    <div class="stat-small-label">Network Fee</div>
-                    <div class="stat-small-value">1.2%</div>
-                </div>
-                <div class="stat-small">
-                    <div class="stat-small-label">Payment Method</div>
-                    <div class="stat-small-value">Coinbase</div>
-                </div>
-            </div>
-
-            <div class="mining-status">
-                <h3>✅ All Mining Protections Active</h3>
-                <div class="status-item">✓ Automatic earnings tracking enabled</div>
-                <div class="status-item">✓ Daily conversion automation active</div>
-                <div class="status-item">✓ Price fluctuation protection enabled</div>
-                <div class="status-item">✓ Multi-coin diversification active</div>
-                <div class="status-item">✓ Pool redundancy configured</div>
-            </div>
-        </div>
-
-        <!-- Footer -->
-        <div class="footer">
-            <p>RDCM Mining Platform • 24/7 Cryptocurrency Mining & Earnings Automation</p>
-            <p>Mining • Conversion • Automation | All systems operational</p>
         </div>
     </div>
 
     <script>
-        // Live data updates
-        setInterval(() => {
-            // Update mining metrics in real-time
-        }, 5000);
+        async function loadDashboard() {
+            const token = localStorage.getItem('token');
+            if (!token) {
+                window.location.href = '/';
+                return;
+            }
 
-        // Test API connection
-        fetch('/health')
-            .then(r => r.json())
-            .then(data => console.log('Mining status:', data))
-            .catch(e => console.log('Mining API initializing'));
+            try {
+                const response = await fetch('/api/dashboard', {
+                    headers: { 'Authorization': 'Bearer ' + token }
+                });
+                const data = await response.json();
+
+                document.getElementById('miningBalance').textContent = '$' + data.mining.balance;
+                document.getElementById('dailyEarnings').textContent = '$' + data.mining.dailyEarnings;
+                document.getElementById('currentPlan').textContent = data.subscription.plan || 'Free';
+            } catch (error) {
+                console.error('Error loading dashboard:', error);
+            }
+        }
+
+        function logout() {
+            localStorage.removeItem('token');
+            localStorage.removeItem('userId');
+            window.location.href = '/';
+        }
+
+        function showPlans() {
+            alert('Upgrade to Pro or Elite for AI-powered trading signals!');
+        }
+
+        loadDashboard();
     </script>
 </body>
 </html>

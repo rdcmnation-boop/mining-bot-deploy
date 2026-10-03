@@ -1,1 +1,1 @@
-web: node server-live-money.js
+web: node server-minimal.js

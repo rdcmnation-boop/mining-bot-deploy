@@ -1,28 +1,27 @@
-# RDCM Nation - Mining Dashboard
-# Netlify Configuration - Oct 3 2026 15:15 UTC
-
 [build]
-  command = "echo 'Mining dashboard ready for deployment'"
+  command = "npm install && npm start"
+  functions = "functions"
   publish = "public"
-  base = ""
 
-# SPA routing - serve index.html for all routes
 [[redirects]]
   from = "/*"
   to = "/index.html"
   status = 200
-  force = false
 
-# No-cache headers for live content
+[[redirects]]
+  from = "/api/*"
+  to = "/.netlify/functions/:splat"
+  status = 200
+
+[env.production]
+  [env.production.context.production.environment]
+    NODE_ENV = "production"
+    PORT = "8080"
+
 [[headers]]
   for = "/*"
   [headers.values]
     Cache-Control = "public, max-age=0, must-revalidate"
-    Pragma = "no-cache"
-    Expires = "0"
-
-# Specific cache for static assets if needed
-[[headers]]
-  for = "/assets/*"
-  [headers.values]
-    Cache-Control = "public, max-age=31536000, immutable"
+    X-Content-Type-Options = "nosniff"
+    X-Frame-Options = "SAMEORIGIN"
+    X-XSS-Protection = "1; mode=block"

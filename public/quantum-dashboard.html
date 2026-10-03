@@ -1,0 +1,637 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>RDCM Quantum Dashboard - AI Trading & Mining</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: linear-gradient(135deg, #0a0e27 0%, #1a1f3a 100%);
+      color: #e0e0e0;
+      overflow-x: hidden;
+    }
+
+    /* Quantum glow effect */
+    .quantum-glow {
+      background: radial-gradient(circle at center, rgba(0, 255, 255, 0.1) 0%, transparent 70%);
+      box-shadow: 0 0 30px rgba(0, 255, 255, 0.2), inset 0 0 30px rgba(0, 255, 255, 0.05);
+    }
+
+    header {
+      background: rgba(10, 14, 39, 0.95);
+      border-bottom: 2px solid #00ffff;
+      padding: 20px 40px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+
+    .logo {
+      font-size: 24px;
+      font-weight: bold;
+      color: #00ffff;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .logo::before {
+      content: "⚛️";
+    }
+
+    nav {
+      display: flex;
+      gap: 30px;
+    }
+
+    nav a {
+      color: #a0a0a0;
+      text-decoration: none;
+      cursor: pointer;
+      transition: color 0.3s;
+    }
+
+    nav a:hover, nav a.active {
+      color: #00ffff;
+    }
+
+    .logout-btn {
+      background: linear-gradient(135deg, #ff0055, #ff00aa);
+      color: white;
+      border: none;
+      padding: 10px 20px;
+      border-radius: 5px;
+      cursor: pointer;
+      transition: transform 0.2s;
+    }
+
+    .logout-btn:hover {
+      transform: scale(1.05);
+    }
+
+    .container {
+      max-width: 1400px;
+      margin: 0 auto;
+      padding: 40px 20px;
+    }
+
+    .dashboard-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 30px;
+      margin-bottom: 40px;
+    }
+
+    .card {
+      background: rgba(20, 25, 50, 0.8);
+      border: 1px solid rgba(0, 255, 255, 0.3);
+      border-radius: 12px;
+      padding: 25px;
+      transition: all 0.3s;
+    }
+
+    .card:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 20px 40px rgba(0, 255, 255, 0.15);
+    }
+
+    .card.quantum {
+      border-color: #00ffff;
+      background: rgba(0, 255, 255, 0.05);
+    }
+
+    .card h3 {
+      color: #00ffff;
+      margin-bottom: 15px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 18px;
+    }
+
+    .card .value {
+      font-size: 32px;
+      font-weight: bold;
+      color: #00ffff;
+      margin: 10px 0;
+    }
+
+    .card .label {
+      color: #7080a0;
+      font-size: 12px;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+
+    .card .subvalue {
+      color: #a0a0a0;
+      font-size: 14px;
+      margin-top: 8px;
+    }
+
+    .metric-row {
+      display: flex;
+      justify-content: space-between;
+      margin: 12px 0;
+      padding: 8px 0;
+      border-bottom: 1px solid rgba(0, 255, 255, 0.1);
+    }
+
+    .metric-row:last-child {
+      border-bottom: none;
+    }
+
+    .metric-label {
+      color: #8090a0;
+      font-size: 13px;
+    }
+
+    .metric-value {
+      color: #00ffff;
+      font-weight: bold;
+    }
+
+    .agent-status {
+      display: inline-block;
+      padding: 4px 12px;
+      border-radius: 20px;
+      font-size: 12px;
+      font-weight: bold;
+      margin: 4px;
+    }
+
+    .agent-active {
+      background: rgba(0, 255, 0, 0.2);
+      color: #00ff00;
+      border: 1px solid #00ff00;
+    }
+
+    .agent-inactive {
+      background: rgba(128, 128, 128, 0.2);
+      color: #808080;
+      border: 1px solid #808080;
+    }
+
+    .signal-item {
+      background: rgba(0, 20, 40, 0.6);
+      border-left: 3px solid #00ffff;
+      padding: 12px;
+      margin: 8px 0;
+      border-radius: 4px;
+    }
+
+    .signal-action.BUY {
+      color: #00ff00;
+      font-weight: bold;
+    }
+
+    .signal-action.SELL {
+      color: #ff0055;
+      font-weight: bold;
+    }
+
+    .signal-action.HOLD {
+      color: #ffaa00;
+      font-weight: bold;
+    }
+
+    .quantum-box {
+      background: linear-gradient(135deg, rgba(0, 255, 255, 0.1) 0%, rgba(0, 100, 255, 0.05) 100%);
+      border: 2px solid rgba(0, 255, 255, 0.3);
+      border-radius: 12px;
+      padding: 20px;
+      margin-top: 30px;
+    }
+
+    .quantum-title {
+      color: #00ffff;
+      font-size: 20px;
+      font-weight: bold;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 20px;
+    }
+
+    .grid-2 {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 20px;
+    }
+
+    .progress-bar {
+      background: rgba(0, 50, 100, 0.6);
+      height: 6px;
+      border-radius: 3px;
+      margin: 8px 0;
+      overflow: hidden;
+    }
+
+    .progress-fill {
+      background: linear-gradient(90deg, #00ffff, #0088ff);
+      height: 100%;
+      border-radius: 3px;
+      transition: width 0.5s ease;
+    }
+
+    .chart-container {
+      background: rgba(0, 20, 40, 0.6);
+      border-radius: 12px;
+      padding: 20px;
+      margin-top: 30px;
+      border: 1px solid rgba(0, 255, 255, 0.2);
+    }
+
+    .emoji {
+      font-size: 20px;
+      margin-right: 8px;
+    }
+
+    @keyframes pulse-quantum {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.7; }
+    }
+
+    .pulse {
+      animation: pulse-quantum 2s infinite;
+    }
+
+    @media (max-width: 768px) {
+      .grid-2 {
+        grid-template-columns: 1fr;
+      }
+
+      header {
+        flex-direction: column;
+        gap: 15px;
+      }
+
+      nav {
+        flex-direction: column;
+        gap: 10px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="logo">RDCM Quantum Dashboard</div>
+    <nav>
+      <a href="#" onclick="switchTab('overview')" class="nav-link active">Overview</a>
+      <a href="#" onclick="switchTab('quantum')" class="nav-link">Quantum Brain</a>
+      <a href="#" onclick="switchTab('agents')" class="nav-link">AI Agents</a>
+      <a href="#" onclick="switchTab('signals')" class="nav-link">Signals</a>
+    </nav>
+    <button class="logout-btn" onclick="logout()">Logout</button>
+  </header>
+
+  <div class="container">
+    <!-- OVERVIEW TAB -->
+    <div id="overview-tab" class="tab-content active">
+      <div class="dashboard-grid">
+        <!-- Portfolio Value -->
+        <div class="card quantum">
+          <h3><span class="emoji">💰</span>Portfolio Value</h3>
+          <div class="value" id="portfolio-value">$0.00</div>
+          <div class="label">Total Assets</div>
+          <div class="subvalue" id="portfolio-change">+0.00% today</div>
+        </div>
+
+        <!-- AI Brain Status -->
+        <div class="card quantum">
+          <h3><span class="emoji">🧠</span>AI Brain Status</h3>
+          <div class="value" id="brain-accuracy">85.1%</div>
+          <div class="label">Classical Accuracy</div>
+          <div class="subvalue" id="brain-version">AutoRule 2026-H2.2</div>
+          <div style="margin-top: 10px;">
+            <span class="agent-status agent-active">Active</span>
+          </div>
+        </div>
+
+        <!-- Mining Performance -->
+        <div class="card quantum">
+          <h3><span class="emoji">⛏️</span>Mining Earnings</h3>
+          <div class="value" id="mining-balance">$0.00</div>
+          <div class="label">24H Earnings</div>
+          <div class="subvalue" id="mining-rate">$0.00/hour</div>
+        </div>
+
+        <!-- Trading Performance -->
+        <div class="card quantum">
+          <h3><span class="emoji">📈</span>Trading Performance</h3>
+          <div class="value" id="win-rate">0%</div>
+          <div class="label">Win Rate</div>
+          <div class="subvalue" id="avg-return">+0.00% avg return</div>
+        </div>
+
+        <!-- Active Signals -->
+        <div class="card quantum">
+          <h3><span class="emoji">🎯</span>Active Signals</h3>
+          <div class="value" id="signal-count">0</div>
+          <div class="label">AI Recommendations</div>
+          <div class="subvalue" id="signal-confidence">High Confidence</div>
+        </div>
+
+        <!-- Subscription Status -->
+        <div class="card quantum">
+          <h3><span class="emoji">✨</span>Plan Status</h3>
+          <div class="value" id="plan-name">Free</div>
+          <div class="label">Current Subscription</div>
+          <div class="subvalue" id="plan-end">No expiration</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- QUANTUM TAB -->
+    <div id="quantum-tab" class="tab-content">
+      <div class="quantum-box">
+        <div class="quantum-title">⚛️ Quantum Brain Analysis Engine</div>
+
+        <div class="grid-2">
+          <div class="card quantum">
+            <h3>Quantum Accuracy</h3>
+            <div class="value" id="quantum-accuracy">99%+</div>
+            <div class="label">Enhanced AI</div>
+            <div style="margin-top: 15px;">
+              <div class="label">3x Accuracy Boost</div>
+              <div class="progress-bar">
+                <div class="progress-fill" style="width: 99%"></div>
+              </div>
+            </div>
+          </div>
+
+          <div class="card quantum">
+            <h3>Quantum Metrics</h3>
+            <div class="metric-row">
+              <div class="metric-label">Superposition Depth</div>
+              <div class="metric-value" id="superposition">8 states</div>
+            </div>
+            <div class="metric-row">
+              <div class="metric-label">Entanglement</div>
+              <div class="metric-value" id="entanglement">95%</div>
+            </div>
+            <div class="metric-row">
+              <div class="metric-label">Tunneling Prob</div>
+              <div class="metric-value" id="tunneling">87%</div>
+            </div>
+          </div>
+
+          <div class="card quantum">
+            <h3>Quantum Volume</h3>
+            <div class="value" id="quantum-volume">64</div>
+            <div class="label">Circuit Depth</div>
+            <div class="progress-bar">
+              <div class="progress-fill" style="width: 64%"></div>
+            </div>
+          </div>
+
+          <div class="card quantum">
+            <h3>Quantum State</h3>
+            <div class="metric-row">
+              <div class="metric-label">Status</div>
+              <div class="metric-value">Online</div>
+            </div>
+            <div class="metric-row">
+              <div class="metric-label">Coverage</div>
+              <div class="metric-value" id="quantum-coverage">Elite+</div>
+            </div>
+          </div>
+        </div>
+
+        <div style="margin-top: 20px; padding: 15px; background: rgba(0, 255, 255, 0.05); border-radius: 8px; border-left: 3px solid #00ffff;">
+          <div style="color: #00ffff; font-weight: bold; margin-bottom: 8px;">Quantum Advantage:</div>
+          <ul style="color: #a0a0a0; margin-left: 20px; line-height: 1.8;">
+            <li>Superposition analysis of 8 market scenarios simultaneously</li>
+            <li>Quantum entanglement detection for correlated assets</li>
+            <li>Quantum tunneling for hidden breakout opportunities</li>
+            <li>Real-time signal synthesis with 99%+ accuracy</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <!-- AGENTS TAB -->
+    <div id="agents-tab" class="tab-content">
+      <div class="quantum-box">
+        <div class="quantum-title">🤖 Autonomous AI Agents</div>
+
+        <div class="grid-2">
+          <!-- Trading Agent -->
+          <div class="card quantum">
+            <h3>Trading Agent</h3>
+            <div class="agent-status agent-active pulse">ACTIVE</div>
+            <div class="metric-row">
+              <div class="metric-label">Total Trades</div>
+              <div class="metric-value" id="trading-count">0</div>
+            </div>
+            <div class="metric-row">
+              <div class="metric-label">Win Rate</div>
+              <div class="metric-value" id="trading-win">0%</div>
+            </div>
+            <div class="metric-row">
+              <div class="metric-label">Avg Return</div>
+              <div class="metric-value" id="trading-return">0%</div>
+            </div>
+            <div class="metric-row">
+              <div class="metric-label">Status</div>
+              <div class="metric-value">Monitoring</div>
+            </div>
+          </div>
+
+          <!-- Mining Agent -->
+          <div class="card quantum">
+            <h3>Mining Agent</h3>
+            <div class="agent-status agent-active pulse">ACTIVE</div>
+            <div class="metric-row">
+              <div class="metric-label">Daily Earnings</div>
+              <div class="metric-value" id="mining-daily">$0</div>
+            </div>
+            <div class="metric-row">
+              <div class="metric-label">Primary Coins</div>
+              <div class="metric-value" id="mining-coins">3</div>
+            </div>
+            <div class="metric-row">
+              <div class="metric-label">Auto-Convert</div>
+              <div class="metric-value">Enabled</div>
+            </div>
+            <div class="metric-row">
+              <div class="metric-label">Status</div>
+              <div class="metric-value">Mining</div>
+            </div>
+          </div>
+
+          <!-- Portfolio Coordinator -->
+          <div class="card quantum">
+            <h3>Portfolio Coordinator</h3>
+            <div class="agent-status agent-active pulse">ACTIVE</div>
+            <div class="metric-row">
+              <div class="metric-label">Rebalance</div>
+              <div class="metric-value" id="rebalance-status">Optimal</div>
+            </div>
+            <div class="metric-row">
+              <div class="metric-label">Risk Level</div>
+              <div class="metric-value" id="risk-level">Medium</div>
+            </div>
+            <div class="metric-row">
+              <div class="metric-label">Allocation</div>
+              <div class="metric-value">60/40</div>
+            </div>
+            <div class="metric-row">
+              <div class="metric-label">Status</div>
+              <div class="metric-value">Optimizing</div>
+            </div>
+          </div>
+
+          <!-- Quantum Brain Agent -->
+          <div class="card quantum">
+            <h3>Quantum Brain Agent</h3>
+            <div class="agent-status" id="quantum-agent-status">ELITE ONLY</div>
+            <div class="metric-row">
+              <div class="metric-label">Accuracy</div>
+              <div class="metric-value">99%+</div>
+            </div>
+            <div class="metric-row">
+              <div class="metric-label">Analysis Type</div>
+              <div class="metric-value">Quantum</div>
+            </div>
+            <div class="metric-row">
+              <div class="metric-label">Scenarios</div>
+              <div class="metric-value">8 states</div>
+            </div>
+            <div class="metric-row">
+              <div class="metric-label">Status</div>
+              <div class="metric-value" id="quantum-agent-ready">Ready</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- SIGNALS TAB -->
+    <div id="signals-tab" class="tab-content">
+      <div class="card quantum">
+        <h3>Latest AI Trading Signals</h3>
+        <div id="signals-list">
+          <div class="signal-item" style="opacity: 0.5;">
+            <p style="color: #7080a0;">No active signals yet. Enable Trading Agent to receive AI recommendations.</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="chart-container" style="margin-top: 30px;">
+        <h3 style="color: #00ffff; margin-bottom: 20px;">Signal Performance</h3>
+        <div class="metric-row">
+          <div class="metric-label">Total Signals Generated</div>
+          <div class="metric-value" id="total-signals">0</div>
+        </div>
+        <div class="metric-row">
+          <div class="metric-label">Successful Signals</div>
+          <div class="metric-value" id="successful-signals">0</div>
+        </div>
+        <div class="metric-row">
+          <div class="metric-label">Success Rate</div>
+          <div class="metric-value" id="signal-success-rate">0%</div>
+        </div>
+        <div class="metric-row">
+          <div class="metric-label">Avg Confidence</div>
+          <div class="metric-value" id="avg-confidence">0%</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    let token = localStorage.getItem('token');
+    let userId = localStorage.getItem('userId');
+
+    function switchTab(tabName) {
+      // Hide all tabs
+      document.querySelectorAll('.tab-content').forEach(tab => {
+        tab.classList.remove('active');
+      });
+      document.querySelectorAll('.nav-link').forEach(link => {
+        link.classList.remove('active');
+      });
+
+      // Show selected tab
+      document.getElementById(tabName + '-tab').classList.add('active');
+      event.target.classList.add('active');
+    }
+
+    async function loadDashboard() {
+      if (!token) {
+        window.location.href = '/index.html';
+        return;
+      }
+
+      try {
+        const response = await fetch('/api/dashboard', {
+          headers: { 'Authorization': `Bearer ${token}` }
+        });
+
+        if (!response.ok) throw new Error('Failed to load dashboard');
+
+        const data = await response.json();
+
+        // Update portfolio
+        document.getElementById('portfolio-value').textContent = `$${(data.portfolio?.totalValue || 0).toFixed(2)}`;
+        document.getElementById('portfolio-change').textContent = `${(data.portfolio?.miningContribution || 0) > 0 ? '+' : ''}${(data.portfolio?.performance?.combinedROI || 0).toFixed(2)}% today`;
+
+        // Update brain status
+        document.getElementById('brain-accuracy').textContent = `${(data.brainAccuracy * 100).toFixed(1)}%`;
+        document.getElementById('brain-version').textContent = data.quantum?.brainVersion || 'AutoRule 2026-H2.2';
+
+        // Update mining
+        document.getElementById('mining-balance').textContent = `$${(data.mining?.performance?.dailyEarnings || 0).toFixed(2)}`;
+        document.getElementById('mining-rate').textContent = `$${(data.mining?.performance?.hourlyRate || 0).toFixed(2)}/hour`;
+
+        // Update trading
+        document.getElementById('win-rate').textContent = `${(data.trading?.performance?.winRate || 0).toFixed(1)}%`;
+        document.getElementById('avg-return').textContent = `${(data.trading?.performance?.avgReturn || 0).toFixed(2)}% avg`;
+
+        // Update plan
+        document.getElementById('plan-name').textContent = data.user.plan.toUpperCase();
+        document.getElementById('plan-end').textContent = data.subscription.currentPeriodEnd ? new Date(data.subscription.currentPeriodEnd).toLocaleDateString() : 'No expiration';
+
+        // Update quantum info if available
+        if (data.quantum) {
+          document.getElementById('quantum-accuracy').textContent = `${(data.quantum.quantumAccuracy)}`;
+          document.getElementById('superposition').textContent = `${data.quantum.superpositionDepth} states`;
+          document.getElementById('entanglement').textContent = data.quantum.entanglementStrength;
+          document.getElementById('tunneling').textContent = data.quantum.tunnelingProbability;
+          document.getElementById('quantum-volume').textContent = data.quantum.quantumVolume;
+
+          if (data.user.plan === 'elite') {
+            document.getElementById('quantum-agent-status').textContent = 'ACTIVE';
+            document.getElementById('quantum-agent-status').className = 'agent-status agent-active';
+          }
+        }
+      } catch (error) {
+        console.error('Dashboard load error:', error);
+      }
+    }
+
+    function logout() {
+      localStorage.removeItem('token');
+      localStorage.removeItem('userId');
+      window.location.href = '/index.html';
+    }
+
+    // Load dashboard on page load
+    loadDashboard();
+
+    // Refresh every 30 seconds
+    setInterval(loadDashboard, 30000);
+  </script>
+</body>
+</html>

@@ -1,0 +1,367 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RDCM Control Hub - Trading & Gaming Platform</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Segoe UI', sans-serif;
+            background: linear-gradient(135deg, #0f1419 0%, #1a1f2e 100%);
+            color: #e0e0e0;
+            padding: 20px;
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 50px;
+        }
+
+        h1 {
+            font-size: 48px;
+            margin-bottom: 10px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .tagline {
+            font-size: 18px;
+            color: #999;
+            margin-bottom: 30px;
+        }
+
+        .status-bar {
+            background: #1a1f2e;
+            border: 2px solid #667eea;
+            padding: 20px;
+            border-radius: 12px;
+            margin-bottom: 40px;
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 20px;
+            text-align: center;
+        }
+
+        .status-item {
+            border-right: 1px solid #2d3748;
+        }
+
+        .status-item:last-child {
+            border-right: none;
+        }
+
+        .status-value {
+            font-size: 24px;
+            color: #4caf50;
+            font-weight: bold;
+        }
+
+        .status-label {
+            font-size: 12px;
+            color: #666;
+            margin-top: 5px;
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 30px;
+            margin-bottom: 40px;
+        }
+
+        .card {
+            background: #1a1f2e;
+            border: 2px solid #2d3748;
+            border-radius: 12px;
+            overflow: hidden;
+            transition: all 0.3s;
+            cursor: pointer;
+        }
+
+        .card:hover {
+            border-color: #667eea;
+            transform: translateY(-5px);
+            box-shadow: 0 10px 30px rgba(102, 126, 234, 0.2);
+        }
+
+        .card-header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 25px;
+            text-align: center;
+            color: white;
+        }
+
+        .card-icon {
+            font-size: 36px;
+            margin-bottom: 10px;
+        }
+
+        .card-title {
+            font-size: 22px;
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+
+        .card-subtitle {
+            font-size: 12px;
+            opacity: 0.9;
+        }
+
+        .card-content {
+            padding: 25px;
+        }
+
+        .card-description {
+            color: #999;
+            margin-bottom: 20px;
+            font-size: 13px;
+            line-height: 1.6;
+        }
+
+        .card-features {
+            list-style: none;
+            margin-bottom: 20px;
+        }
+
+        .card-features li {
+            padding: 8px 0;
+            color: #ccc;
+            font-size: 12px;
+            border-bottom: 1px solid #2d3748;
+        }
+
+        .card-features li:before {
+            content: "✓ ";
+            color: #4caf50;
+            margin-right: 8px;
+        }
+
+        .card-features li:last-child {
+            border-bottom: none;
+        }
+
+        .btn {
+            display: inline-block;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 12px 30px;
+            border-radius: 8px;
+            text-decoration: none;
+            font-weight: bold;
+            transition: all 0.3s;
+            border: none;
+            cursor: pointer;
+            font-size: 14px;
+            width: 100%;
+            text-align: center;
+        }
+
+        .btn:hover {
+            transform: scale(1.05);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+
+        .accent {
+            color: #4caf50;
+        }
+
+        @media (max-width: 768px) {
+            .grid {
+                grid-template-columns: 1fr;
+            }
+
+            .status-bar {
+                grid-template-columns: repeat(2, 1fr);
+            }
+
+            h1 {
+                font-size: 32px;
+            }
+        }
+
+        .quick-links {
+            background: #1a1f2e;
+            border: 2px solid #667eea;
+            padding: 30px;
+            border-radius: 12px;
+            margin-bottom: 40px;
+        }
+
+        .quick-links h3 {
+            margin-bottom: 20px;
+            color: #667eea;
+        }
+
+        .links-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 15px;
+        }
+
+        .quick-link {
+            background: #0f1419;
+            border: 1px solid #2d3748;
+            padding: 15px;
+            border-radius: 8px;
+            text-align: center;
+            text-decoration: none;
+            color: #e0e0e0;
+            transition: all 0.3s;
+        }
+
+        .quick-link:hover {
+            border-color: #667eea;
+            color: #667eea;
+        }
+
+        .quick-link-icon {
+            font-size: 24px;
+            margin-bottom: 8px;
+        }
+
+        .quick-link-text {
+            font-size: 12px;
+        }
+
+        footer {
+            text-align: center;
+            padding: 30px;
+            color: #666;
+            border-top: 1px solid #2d3748;
+            margin-top: 40px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>⚡ RDCMNATION QUANTUM</h1>
+            <p class="tagline">AI-Powered Stock & Crypto Trading - Enterprise Quantum Brain</p>
+        </header>
+
+        <div class="status-bar">
+            <div class="status-item">
+                <div class="status-value">✅ Online</div>
+                <div class="status-label">Backend Status</div>
+            </div>
+            <div class="status-item">
+                <div class="status-value">99%+</div>
+                <div class="status-label">AI Accuracy</div>
+            </div>
+            <div class="status-item">
+                <div class="status-value">6 Bots</div>
+                <div class="status-label">Active Agents</div>
+            </div>
+            <div class="status-item">
+                <div class="status-value">Real-Time</div>
+                <div class="status-label">Processing</div>
+            </div>
+        </div>
+
+        <div class="quick-links">
+            <h3>🚀 Quick Access</h3>
+            <div class="links-grid">
+                <a href="index.html" class="quick-link">
+                    <div class="quick-link-icon">🎪</div>
+                    <div class="quick-link-text">Landing Page</div>
+                </a>
+                <a href="bot-control.html" class="quick-link">
+                    <div class="quick-link-icon">📈</div>
+                    <div class="quick-link-text">Trading Bot</div>
+                </a>
+                <a href="quantum-brain.html" class="quick-link">
+                    <div class="quick-link-icon">🧠</div>
+                    <div class="quick-link-text">Quantum Brain</div>
+                </a>
+                <a href="dashboard.html" class="quick-link">
+                    <div class="quick-link-icon">📊</div>
+                    <div class="quick-link-text">Dashboard</div>
+                </a>
+            </div>
+        </div>
+
+        <div class="grid">
+            <!-- Trading Bot Card -->
+            <div class="card">
+                <div class="card-header">
+                    <div class="card-icon">📈</div>
+                    <div class="card-title">Trading Bot</div>
+                    <div class="card-subtitle">Stocks & Crypto Automation</div>
+                </div>
+                <div class="card-content">
+                    <p class="card-description">
+                        Quantum Brain-powered trading system generating real-time signals for stocks and cryptocurrencies with proven performance.
+                    </p>
+                    <ul class="card-features">
+                        <li>67.3% win rate</li>
+                        <li>99%+ accuracy (Elite)</li>
+                        <li>Auto-execution capability</li>
+                        <li>Real-time P&L tracking</li>
+                        <li>Advanced risk management</li>
+                    </ul>
+                    <a href="bot-control.html" class="btn">Launch Trading Dashboard</a>
+                </div>
+            </div>
+
+            <!-- Quantum Brain Card -->
+            <div class="card">
+                <div class="card-header">
+                    <div class="card-icon">🧠</div>
+                    <div class="card-title">Quantum Brain</div>
+                    <div class="card-subtitle">Advanced Trading AI</div>
+                </div>
+                <div class="card-content">
+                    <p class="card-description">
+                        Complete technical documentation of the Quantum Brain AI engine powering advanced stock and cryptocurrency trading.
+                    </p>
+                    <ul class="card-features">
+                        <li>5-layer neural network</li>
+                        <li>Real-world performance data</li>
+                        <li>Risk management protocols</li>
+                        <li>Market analysis algorithms</li>
+                        <li>ML architecture specs</li>
+                    </ul>
+                    <a href="quantum-brain.html" class="btn">View Architecture</a>
+                </div>
+            </div>
+
+            <!-- Landing Page Card -->
+            <div class="card">
+                <div class="card-header">
+                    <div class="card-icon">🎪</div>
+                    <div class="card-title">Platform Homepage</div>
+                    <div class="card-subtitle">Public Landing Page</div>
+                </div>
+                <div class="card-content">
+                    <p class="card-description">
+                        Main landing page showcasing the unified RDCM SaaS platform with pricing and features.
+                    </p>
+                    <ul class="card-features">
+                        <li>Product overview</li>
+                        <li>3-tier pricing</li>
+                        <li>Feature showcase</li>
+                        <li>Auth modal</li>
+                        <li>Sign up / Login</li>
+                    </ul>
+                    <a href="index.html" class="btn">View Landing Page</a>
+                </div>
+            </div>
+        </div>
+
+        <footer>
+            <p style="margin-bottom: 10px;"><strong>⚡ RDCM Quantum Trading Platform</strong></p>
+            <p style="font-size: 12px;">Backend: Node.js | Frontend: HTML5/CSS3/JS | AI: Quantum Brain Engine | Database: Real-time in-memory</p>
+            <p style="font-size: 11px; margin-top: 15px; color: #555;">© 2026 RDCM Nation. All rights reserved.</p>
+        </footer>
+    </div>
+</body>
+</html>
