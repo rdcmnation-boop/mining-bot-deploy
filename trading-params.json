@@ -1,0 +1,25 @@
+{
+  "portfolio": {
+    "initialCapital": 10000,
+    "currency": "USD"
+  },
+  "positions": {
+    "minSize": 100,
+    "maxSize": 5000,
+    "maxCount": 10
+  },
+  "trading": {
+    "symbols": [
+      "AAPL",
+      "MSFT",
+      "AMZN",
+      "TSLA",
+      "NVDA"
+    ],
+    "minConfidence": 65
+  },
+  "riskControls": {
+    "maxDailyLoss": 500,
+    "maxPositionLoss": 100
+  }
+}

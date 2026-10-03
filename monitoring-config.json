@@ -1,0 +1,21 @@
+{
+  "endpoints": [
+    "GET /health",
+    "GET /api/automation/earnings",
+    "GET /api/trading/metrics"
+  ],
+  "metrics": {
+    "mining": [
+      "balance",
+      "earnings_rate"
+    ],
+    "trading": [
+      "win_rate",
+      "avg_return"
+    ],
+    "system": [
+      "uptime",
+      "response_time"
+    ]
+  }
+}

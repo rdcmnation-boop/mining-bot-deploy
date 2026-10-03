@@ -1,0 +1,10 @@
+{
+  "authentication": {
+    "jwtSecret": "b37a8960d55690ae68b251d67a51c00ac4596e12a3318a06510b28b5cc3ed8a1",
+    "tokenExpiry": 86400
+  },
+  "rateLimiting": {
+    "enabled": true,
+    "maxRequests": 100
+  }
+}

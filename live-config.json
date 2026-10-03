@@ -1,0 +1,26 @@
+{
+  "server": {
+    "port": 3001,
+    "environment": "production",
+    "debug": false
+  },
+  "mining": {
+    "enabled": true,
+    "provider": "unmineable",
+    "checkInterval": "09:00"
+  },
+  "trading": {
+    "enabled": true,
+    "strategy": "smart",
+    "minConfidence": 65,
+    "maxPositionSize": 0.05
+  },
+  "automation": {
+    "enabled": true
+  },
+  "monitoring": {
+    "enabled": true,
+    "healthCheck": 300000,
+    "logging": "production"
+  }
+}
