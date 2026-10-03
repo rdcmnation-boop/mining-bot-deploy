@@ -8,11 +8,12 @@ const express = require('express');
 const cors = require('cors');
 const path = require('path');
 const http = require('http');
+const crypto = require('crypto');
 const WebSocket = require('ws');
 const { v4: uuidv4 } = require('uuid');
 const jwt = require('jsonwebtoken');
-const bcrypt = require('bcryptjs');
 const rateLimit = require('express-rate-limit');
+const { createPaymentIntent, setupBankTransfer, processApplePayment, getPaymentMethods } = require('./server-payments');
 
 const app = express();
 const PORT = process.env.PORT || 3001;
@@ -594,7 +595,7 @@ app.post('/api/auth/register', authLimiter, async (req, res) => {
     }
 
     const userId = uuidv4();
-    const hashedPassword = await bcrypt.hash(password, 10);
+    const hashedPassword = crypto.pbkdf2Sync(password, 'rdcm-salt', 10000, 64, 'sha512').toString('hex');
 
     const user = {
       id: userId,
@@ -634,8 +635,8 @@ app.post('/api/auth/login', authLimiter, async (req, res) => {
       return res.status(401).json({ error: 'Invalid credentials' });
     }
 
-    const validPassword = await bcrypt.compare(password, user.password);
-    if (!validPassword) {
+    const hashedInputPassword = crypto.pbkdf2Sync(password, 'rdcm-salt', 10000, 64, 'sha512').toString('hex');
+    if (hashedInputPassword !== user.password) {
       return res.status(401).json({ error: 'Invalid credentials' });
     }
 
@@ -1003,6 +1004,174 @@ app.post('/api/trading/robinhood/order', verifyToken, async (req, res) => {
       order
     });
   } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// ==================== PAYMENT ENDPOINTS ====================
+
+/**
+ * Create payment intent for deposits
+ */
+app.post('/api/funding', verifyToken, async (req, res) => {
+  try {
+    const { amount, currency = 'usd', paymentMethod = 'card' } = req.body;
+    const userId = req.user.id;
+
+    if (!amount || amount <= 0) {
+      return res.status(400).json({ error: 'Invalid amount' });
+    }
+
+    // Create payment intent with Stripe
+    const paymentIntent = await createPaymentIntent(userId, amount, currency);
+
+    if (!paymentIntent) {
+      return res.status(500).json({ error: 'Failed to create payment intent' });
+    }
+
+    // Log transaction
+    const transactionId = uuidv4();
+    const transaction = {
+      id: transactionId,
+      userId,
+      type: 'deposit',
+      amount,
+      currency,
+      paymentMethod,
+      status: 'pending',
+      timestamp: new Date(),
+      stripeId: paymentIntent.id
+    };
+
+    transactions.set(transactionId, transaction);
+
+    res.json({
+      success: true,
+      paymentIntent,
+      transaction
+    });
+  } catch (error) {
+    console.error('Funding error:', error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
+/**
+ * Process Apple Pay payment
+ */
+app.post('/api/funding/apple-pay', verifyToken, async (req, res) => {
+  try {
+    const { token, amount } = req.body;
+    const userId = req.user.id;
+
+    if (!token || !amount || amount <= 0) {
+      return res.status(400).json({ error: 'Invalid token or amount' });
+    }
+
+    // Process Apple Pay payment
+    const charge = await processApplePayment(token, amount, userId);
+
+    if (!charge) {
+      return res.status(500).json({ error: 'Failed to process Apple Pay payment' });
+    }
+
+    // Update user balance
+    let wallet = wallets.get(userId) || { balance: 0, deposits: 0 };
+    wallet.balance += amount;
+    wallet.deposits = (wallet.deposits || 0) + 1;
+    wallets.set(userId, wallet);
+
+    // Log transaction
+    const transactionId = uuidv4();
+    const transaction = {
+      id: transactionId,
+      userId,
+      type: 'deposit',
+      amount,
+      currency: 'usd',
+      paymentMethod: 'apple_pay',
+      status: 'completed',
+      timestamp: new Date(),
+      chargeId: charge.id
+    };
+
+    transactions.set(transactionId, transaction);
+
+    res.json({
+      success: true,
+      charge,
+      transaction,
+      newBalance: wallet.balance
+    });
+  } catch (error) {
+    console.error('Apple Pay error:', error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
+/**
+ * Set up bank transfer
+ */
+app.post('/api/funding/bank-transfer', verifyToken, async (req, res) => {
+  try {
+    const { bankAccount } = req.body;
+    const userId = req.user.id;
+
+    if (!bankAccount || !bankAccount.accountNumber || !bankAccount.routingNumber) {
+      return res.status(400).json({ error: 'Invalid bank account details' });
+    }
+
+    // Create bank account token
+    const bankToken = await setupBankTransfer(userId, bankAccount);
+
+    if (!bankToken) {
+      return res.status(500).json({ error: 'Failed to set up bank transfer' });
+    }
+
+    // Store bank account info
+    let wallet = wallets.get(userId) || { balance: 0, bankAccounts: [] };
+    wallet.bankAccounts = wallet.bankAccounts || [];
+    wallet.bankAccounts.push({
+      id: bankToken.id,
+      name: bankAccount.name,
+      lastFour: bankAccount.accountNumber.slice(-4),
+      created: new Date()
+    });
+
+    wallets.set(userId, wallet);
+
+    res.json({
+      success: true,
+      bankToken,
+      message: 'Bank account linked successfully'
+    });
+  } catch (error) {
+    console.error('Bank transfer error:', error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
+/**
+ * Get payment methods for user
+ */
+app.get('/api/funding/methods', verifyToken, async (req, res) => {
+  try {
+    const userId = req.user.id;
+    const customerId = `cus_${userId}`;
+
+    // Get saved payment methods from Stripe
+    const paymentMethods = await getPaymentMethods(userId, customerId);
+
+    const wallet = wallets.get(userId) || { balance: 0 };
+
+    res.json({
+      success: true,
+      paymentMethods,
+      bankAccounts: wallet.bankAccounts || [],
+      balance: wallet.balance
+    });
+  } catch (error) {
+    console.error('Payment methods error:', error);
     res.status(500).json({ error: error.message });
   }
 });
