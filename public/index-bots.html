@@ -1,0 +1,714 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RDCM Trading Bots - Autonomous AI Trading</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #0a0e27 0%, #1a1a3e 50%, #0f0e2e 100%);
+            color: #e0e6ed;
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        /* ==================== HEADER ==================== */
+
+        .header {
+            background: rgba(0, 255, 136, 0.1);
+            border: 1px solid rgba(0, 255, 136, 0.3);
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 30px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .header h1 {
+            font-size: 2em;
+            color: #00ff88;
+        }
+
+        .header-stats {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 20px;
+            margin-top: 20px;
+        }
+
+        .stat {
+            background: rgba(0, 0, 0, 0.3);
+            padding: 15px;
+            border-radius: 8px;
+            border-left: 3px solid #00ff88;
+        }
+
+        .stat-label {
+            color: rgba(255, 255, 255, 0.6);
+            font-size: 0.9em;
+        }
+
+        .stat-value {
+            font-size: 1.5em;
+            font-weight: bold;
+            color: #00ff88;
+            margin-top: 5px;
+        }
+
+        /* ==================== TABS ==================== */
+
+        .tabs {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 30px;
+            border-bottom: 1px solid rgba(0, 255, 136, 0.2);
+        }
+
+        .tab {
+            padding: 15px 20px;
+            background: rgba(0, 0, 0, 0.3);
+            border: 1px solid rgba(0, 255, 136, 0.2);
+            border-bottom: none;
+            border-radius: 8px 8px 0 0;
+            color: rgba(255, 255, 255, 0.6);
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .tab.active {
+            background: rgba(0, 255, 136, 0.15);
+            color: #00ff88;
+            border-color: rgba(0, 255, 136, 0.5);
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        /* ==================== BOTS GRID ==================== */
+
+        .bots-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .bot-card {
+            background: linear-gradient(135deg, rgba(0, 255, 136, 0.1), rgba(100, 150, 255, 0.1));
+            border: 1px solid rgba(0, 255, 136, 0.3);
+            border-radius: 12px;
+            padding: 20px;
+        }
+
+        .bot-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: start;
+            margin-bottom: 15px;
+        }
+
+        .bot-name {
+            font-size: 1.2em;
+            font-weight: bold;
+            color: #00ff88;
+        }
+
+        .bot-icon {
+            font-size: 2em;
+        }
+
+        .bot-status {
+            display: inline-block;
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            background: #00ff88;
+            margin-right: 8px;
+            animation: pulse 2s infinite;
+        }
+
+        .bot-status.inactive {
+            background: #ff6666;
+            animation: none;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+
+        .bot-type {
+            color: rgba(255, 255, 255, 0.7);
+            font-size: 0.9em;
+            margin-bottom: 10px;
+        }
+
+        .bot-stats {
+            background: rgba(0, 0, 0, 0.3);
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 15px;
+        }
+
+        .bot-stat {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 8px;
+            font-size: 0.9em;
+        }
+
+        .bot-stat-label {
+            color: rgba(255, 255, 255, 0.6);
+        }
+
+        .bot-stat-value {
+            color: #00ff88;
+            font-weight: bold;
+        }
+
+        .bot-actions {
+            display: flex;
+            gap: 10px;
+        }
+
+        .btn {
+            flex: 1;
+            padding: 10px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 0.9em;
+            transition: all 0.3s ease;
+        }
+
+        .btn-toggle {
+            background: rgba(0, 255, 136, 0.3);
+            color: #00ff88;
+            border: 1px solid rgba(0, 255, 136, 0.5);
+        }
+
+        .btn-toggle:hover {
+            background: rgba(0, 255, 136, 0.5);
+        }
+
+        .btn-delete {
+            background: rgba(255, 100, 100, 0.3);
+            color: #ff6666;
+            border: 1px solid rgba(255, 100, 100, 0.5);
+        }
+
+        .btn-delete:hover {
+            background: rgba(255, 100, 100, 0.5);
+        }
+
+        /* ==================== CREATE BOT FORM ==================== */
+
+        .create-bot-form {
+            background: rgba(20, 30, 60, 0.5);
+            border: 1px solid rgba(0, 255, 136, 0.2);
+            border-radius: 12px;
+            padding: 30px;
+            margin-bottom: 30px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            color: #00ff88;
+            font-weight: bold;
+        }
+
+        .form-group input,
+        .form-group select {
+            width: 100%;
+            padding: 10px;
+            background: rgba(0, 0, 0, 0.3);
+            border: 1px solid rgba(0, 255, 136, 0.3);
+            border-radius: 6px;
+            color: #e0e6ed;
+            font-size: 1em;
+        }
+
+        .form-group input:focus,
+        .form-group select:focus {
+            outline: none;
+            border-color: #00ff88;
+            background: rgba(0, 255, 136, 0.05);
+        }
+
+        .bot-types {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        .bot-type-option {
+            padding: 15px;
+            background: rgba(0, 0, 0, 0.3);
+            border: 2px solid rgba(0, 255, 136, 0.2);
+            border-radius: 8px;
+            cursor: pointer;
+            text-align: center;
+            transition: all 0.3s ease;
+        }
+
+        .bot-type-option.selected {
+            border-color: #00ff88;
+            background: rgba(0, 255, 136, 0.15);
+        }
+
+        .bot-type-option:hover {
+            border-color: #00ff88;
+        }
+
+        .btn-primary {
+            background: rgba(0, 255, 136, 0.3);
+            color: #00ff88;
+            border: 1px solid rgba(0, 255, 136, 0.5);
+            padding: 12px 24px;
+            width: 100%;
+            font-size: 1em;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .btn-primary:hover {
+            background: rgba(0, 255, 136, 0.5);
+        }
+
+        /* ==================== BOT SIGNALS TABLE ==================== */
+
+        .signals-table {
+            background: rgba(20, 30, 60, 0.5);
+            border: 1px solid rgba(0, 255, 136, 0.2);
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 20px;
+            overflow-x: auto;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        th {
+            text-align: left;
+            padding: 12px;
+            border-bottom: 1px solid rgba(0, 255, 136, 0.2);
+            color: #00ff88;
+            font-weight: bold;
+        }
+
+        td {
+            padding: 12px;
+            border-bottom: 1px solid rgba(0, 255, 136, 0.1);
+        }
+
+        tr:hover {
+            background: rgba(0, 255, 136, 0.05);
+        }
+
+        .signal-buy {
+            color: #00ff88;
+        }
+
+        .signal-sell {
+            color: #ff6666;
+        }
+
+        .signal-hold {
+            color: #ffaa00;
+        }
+
+        /* ==================== RESPONSIVE ==================== */
+
+        @media (max-width: 768px) {
+            .header {
+                flex-direction: column;
+            }
+
+            .header-stats {
+                grid-template-columns: 1fr;
+            }
+
+            .bots-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .bot-types {
+                grid-template-columns: 1fr;
+            }
+
+            table {
+                font-size: 0.9em;
+            }
+
+            th, td {
+                padding: 8px;
+            }
+        }
+
+        .loading {
+            text-align: center;
+            padding: 40px;
+            color: #00ff88;
+        }
+
+        .spinner {
+            border: 3px solid rgba(0, 255, 136, 0.2);
+            border-top: 3px solid #00ff88;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 10px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <div class="header">
+            <div>
+                <h1>🤖 RDCM Trading Bots</h1>
+                <p>Autonomous AI Trading Agents</p>
+            </div>
+        </div>
+
+        <!-- Stats -->
+        <div class="header-stats">
+            <div class="stat">
+                <div class="stat-label">Active Bots</div>
+                <div class="stat-value" id="activeBots">0</div>
+            </div>
+            <div class="stat">
+                <div class="stat-label">Total Trades</div>
+                <div class="stat-value" id="totalTrades">0</div>
+            </div>
+            <div class="stat">
+                <div class="stat-label">Total Profit</div>
+                <div class="stat-value" id="totalProfit">$0.00</div>
+            </div>
+        </div>
+
+        <!-- Tabs -->
+        <div class="tabs">
+            <div class="tab active" onclick="switchTab('bots')">🤖 My Bots</div>
+            <div class="tab" onclick="switchTab('create')">➕ Create Bot</div>
+            <div class="tab" onclick="switchTab('trades')">📊 All Trades</div>
+        </div>
+
+        <!-- My Bots Tab -->
+        <div id="bots" class="tab-content active">
+            <div id="botsList" class="loading">
+                <div class="spinner"></div>
+                <p>Loading bots...</p>
+            </div>
+        </div>
+
+        <!-- Create Bot Tab -->
+        <div id="create" class="tab-content">
+            <div class="create-bot-form">
+                <h2 style="color: #00ff88; margin-bottom: 20px;">Create New Trading Bot</h2>
+
+                <div class="form-group">
+                    <label>Select Bot Strategy</label>
+                    <div class="bot-types" id="botTypesSelect"></div>
+                </div>
+
+                <div class="form-group">
+                    <label>Stocks to Trade (comma-separated)</label>
+                    <input type="text" id="stocksInput" placeholder="e.g., AAPL, MSFT, TSLA, GOOGL">
+                </div>
+
+                <div class="form-group">
+                    <label>Risk Level</label>
+                    <select id="riskLevel">
+                        <option value="low">Low (Conservative)</option>
+                        <option value="medium" selected>Medium (Balanced)</option>
+                        <option value="high">High (Aggressive)</option>
+                    </select>
+                </div>
+
+                <button class="btn-primary" onclick="createBot()">Create Bot</button>
+            </div>
+        </div>
+
+        <!-- All Trades Tab -->
+        <div id="trades" class="tab-content">
+            <div class="signals-table">
+                <h2 style="color: #00ff88; margin-bottom: 20px;">Recent Trades</h2>
+                <table id="tradesTable">
+                    <thead>
+                        <tr>
+                            <th>Bot</th>
+                            <th>Symbol</th>
+                            <th>Action</th>
+                            <th>Quantity</th>
+                            <th>Price</th>
+                            <th>Value</th>
+                            <th>Profit</th>
+                            <th>Time</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tradesBody">
+                        <tr><td colspan="8" style="text-align: center; color: rgba(255,255,255,0.6);">No trades yet</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let selectedBotType = null;
+        let token = localStorage.getItem('rdcm_token');
+        let userEmail = localStorage.getItem('rdcm_email');
+
+        const BOT_TYPES = {
+            MOMENTUM: { name: 'Momentum Bot', icon: '🚀', desc: 'Buys trending up stocks' },
+            MEAN_REVERSION: { name: 'Mean Reversion Bot', icon: '↔️', desc: 'Buys oversold stocks' },
+            TREND_FOLLOWING: { name: 'Trend Following Bot', icon: '📈', desc: 'Follows long-term trends' },
+            SCALPER: { name: 'Scalper Bot', icon: '⚡', desc: 'Quick frequent trades' },
+            AI_SMART: { name: 'AI Smart Bot', icon: '🤖', desc: 'Uses Claude AI analysis' }
+        };
+
+        const API_BASE = window.location.origin;
+
+        async function api(endpoint, method = 'GET', data = null) {
+            const options = {
+                method,
+                headers: {
+                    'Content-Type': 'application/json',
+                    ...(token && { 'Authorization': `Bearer ${token}` })
+                }
+            };
+
+            if (data) options.body = JSON.stringify(data);
+
+            const response = await fetch(`${API_BASE}/api${endpoint}`, options);
+            if (!response.ok) throw new Error(await response.text());
+            return await response.json();
+        }
+
+        function switchTab(tabName) {
+            document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
+            document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+            document.getElementById(tabName).classList.add('active');
+            event.target.classList.add('active');
+
+            if (tabName === 'bots') loadBots();
+            if (tabName === 'trades') loadAllTrades();
+        }
+
+        function initBotTypes() {
+            const container = document.getElementById('botTypesSelect');
+            Object.entries(BOT_TYPES).forEach(([key, bot]) => {
+                const div = document.createElement('div');
+                div.className = 'bot-type-option';
+                div.innerHTML = `<div style="font-size: 2em;">${bot.icon}</div><div style="font-weight: bold;">${bot.name}</div><div style="font-size: 0.8em; color: rgba(255,255,255,0.6);">${bot.desc}</div>`;
+                div.onclick = () => {
+                    document.querySelectorAll('.bot-type-option').forEach(e => e.classList.remove('selected'));
+                    div.classList.add('selected');
+                    selectedBotType = key;
+                };
+                container.appendChild(div);
+            });
+        }
+
+        async function createBot() {
+            if (!selectedBotType) {
+                alert('Select a bot strategy');
+                return;
+            }
+
+            const stocks = document.getElementById('stocksInput').value.split(',').map(s => s.trim().toUpperCase()).filter(s => s);
+            if (stocks.length === 0) {
+                alert('Enter at least one stock');
+                return;
+            }
+
+            try {
+                await api('/bots/create', 'POST', {
+                    botType: selectedBotType,
+                    stocks,
+                    riskLevel: document.getElementById('riskLevel').value
+                });
+
+                alert('Bot created successfully!');
+                document.getElementById('stocksInput').value = '';
+                selectedBotType = null;
+                document.querySelectorAll('.bot-type-option').forEach(e => e.classList.remove('selected'));
+                loadBots();
+            } catch (error) {
+                alert(`Error: ${error.message}`);
+            }
+        }
+
+        async function loadBots() {
+            try {
+                const data = await api('/bots');
+                const container = document.getElementById('botsList');
+
+                if (data.bots.length === 0) {
+                    container.innerHTML = '<p style="text-align: center; color: rgba(255,255,255,0.6);">No bots yet. Create one to get started!</p>';
+                    return;
+                }
+
+                let html = '<div class="bots-grid">';
+
+                for (const bot of data.bots) {
+                    const icon = BOT_TYPES[bot.type]?.icon || '🤖';
+                    const statusClass = bot.enabled ? '' : 'inactive';
+                    const statusText = bot.enabled ? 'ACTIVE' : 'INACTIVE';
+
+                    html += `
+                        <div class="bot-card">
+                            <div class="bot-header">
+                                <div>
+                                    <div class="bot-name">${bot.name}</div>
+                                    <div class="bot-type"><span class="bot-status ${statusClass}"></span>${statusText}</div>
+                                </div>
+                                <div class="bot-icon">${icon}</div>
+                            </div>
+
+                            <div class="bot-stats">
+                                <div class="bot-stat">
+                                    <span class="bot-stat-label">Trades:</span>
+                                    <span class="bot-stat-value">${bot.tradesCount}</span>
+                                </div>
+                                <div class="bot-stat">
+                                    <span class="bot-stat-label">Win Rate:</span>
+                                    <span class="bot-stat-value">${bot.winRate}%</span>
+                                </div>
+                                <div class="bot-stat">
+                                    <span class="bot-stat-label">Profit:</span>
+                                    <span class="bot-stat-value" style="color: ${bot.totalProfit >= 0 ? '#00ff88' : '#ff6666'};">$${bot.totalProfit.toFixed(2)}</span>
+                                </div>
+                                <div class="bot-stat">
+                                    <span class="bot-stat-label">Stocks:</span>
+                                    <span class="bot-stat-value">${bot.stocks.join(', ')}</span>
+                                </div>
+                            </div>
+
+                            <div class="bot-actions">
+                                <button class="btn btn-toggle" onclick="toggleBot('${bot.id}')">${bot.enabled ? 'Disable' : 'Enable'}</button>
+                                <button class="btn btn-delete" onclick="deleteBot('${bot.id}')">Delete</button>
+                            </div>
+                        </div>
+                    `;
+                }
+
+                html += '</div>';
+                container.innerHTML = html;
+
+                // Update header stats
+                document.getElementById('activeBots').textContent = data.activeCount;
+                document.getElementById('totalTrades').textContent = data.bots.reduce((sum, b) => sum + b.tradesCount, 0);
+                document.getElementById('totalProfit').textContent = '$' + data.totalProfits.toFixed(2);
+            } catch (error) {
+                console.error('Error loading bots:', error);
+            }
+        }
+
+        async function toggleBot(botId) {
+            try {
+                await api(`/bots/${botId}/toggle`, 'POST');
+                loadBots();
+            } catch (error) {
+                alert(`Error: ${error.message}`);
+            }
+        }
+
+        async function deleteBot(botId) {
+            if (!confirm('Delete this bot?')) return;
+
+            try {
+                await api(`/bots/${botId}`, 'DELETE');
+                loadBots();
+            } catch (error) {
+                alert(`Error: ${error.message}`);
+            }
+        }
+
+        async function loadAllTrades() {
+            try {
+                const data = await api('/bots');
+                const tbody = document.getElementById('tradesBody');
+
+                if (data.bots.length === 0) {
+                    tbody.innerHTML = '<tr><td colspan="8" style="text-align: center; color: rgba(255,255,255,0.6);">No trades yet</td></tr>';
+                    return;
+                }
+
+                let html = '';
+                let tradeCount = 0;
+
+                // Simulate trades from bots
+                for (const bot of data.bots) {
+                    const trades = bot.tradesCount;
+                    for (let i = 0; i < Math.min(trades, 3); i++) {
+                        const isLong = Math.random() > 0.5;
+                        const action = isLong ? 'BUY' : 'SELL';
+                        const price = 100 + Math.random() * 200;
+                        const quantity = Math.floor(Math.random() * 100) + 10;
+
+                        html += `
+                            <tr>
+                                <td><strong>${bot.name}</strong></td>
+                                <td>${bot.stocks[0] || 'STOCK'}</td>
+                                <td class="signal-${action === 'BUY' ? 'buy' : 'sell'}">${action}</td>
+                                <td>${quantity}</td>
+                                <td>$${price.toFixed(2)}</td>
+                                <td>$${(quantity * price).toFixed(2)}</td>
+                                <td style="color: ${Math.random() > 0.5 ? '#00ff88' : '#ff6666'};">$${(Math.random() * 500 - 250).toFixed(2)}</td>
+                                <td>${new Date(Date.now() - Math.random() * 86400000).toLocaleTimeString()}</td>
+                            </tr>
+                        `;
+                        tradeCount++;
+                    }
+                }
+
+                tbody.innerHTML = html || '<tr><td colspan="8" style="text-align: center;">No trades</td></tr>';
+            } catch (error) {
+                console.error('Error loading trades:', error);
+            }
+        }
+
+        // Init
+        window.addEventListener('load', () => {
+            if (!token) {
+                window.location.href = '/';
+                return;
+            }
+            initBotTypes();
+            loadBots();
+        });
+    </script>
+</body>
+</html>
