@@ -1,9 +1,9 @@
-# RDCM SaaS Platform
-## Mining & Trading Automation as a Service
+# RDCM Trading Bots
+## Autonomous AI-Powered Trading Platform
 
-**Revenue Model:** Subscription-based ($99-$499/month)  
-**Target:** $1M annual revenue  
-**Path:** 200-500 paying customers × $250/month average = $50K-125K/month
+**Platform:** Autonomous trading with 5 AI bot strategies  
+**Status:** Live & Ready  
+**URL:** https://mining-bot-deploy.onrender.com
 
 ---
 
@@ -12,24 +12,25 @@
 ### Backend
 - **Node.js + Express** server
 - **JWT authentication** (secure login/signup)
-- **Stripe integration** for payments
-- **3 subscription tiers** (Starter, Pro, Elite)
-- **Mining API** (Unmineable automation)
-- **Trading API** (AutoRule AI Brain powered signals)
+- **Bot management API** (create, enable, disable bots)
+- **Trading signals API** (real-time AI analysis)
+- **Performance tracking API** (trades, win rate, profits)
 - **Dashboard data** endpoints
 
 ### Frontend
-- **Landing page** with pricing tiers
-- **User dashboard** (real-time earnings tracking)
+- **Bot management dashboard**
+- **Strategy creation interface** (5 bot types)
+- **Real-time signals display** (with confidence scores)
+- **Performance analytics** (trades, profits, win rate)
 - **Sign up / Login** forms
 - **Responsive design** (mobile + desktop)
-- **AutoRule AI Brain status** display
 
-### Automation
-- **24/7 Mining** (Unmineable integration)
-- **AutoRule AI Brain** (85.1% accuracy trading signals)
-- **Auto-conversion** (crypto → USD)
-- **Real money flow** (Robinhood, Coinbase)
+### Trading Strategies
+- **🚀 Momentum Bot** - Trend chasing (buy up, sell down)
+- **↔️ Mean Reversion Bot** - Buy dips, sell peaks
+- **📈 Trend Following Bot** - Long-term trend holding
+- **⚡ Scalper Bot** - Rapid micro-trades
+- **🤖 AI Smart Bot** - Claude API-powered analysis
 
 ---
 
@@ -79,96 +80,111 @@ heroku logs --tail
 - `POST /api/auth/register` - Create account
 - `POST /api/auth/login` - Login
 
-### Subscriptions
-- `GET /api/plans` - Get pricing tiers
-- `POST /api/subscribe` - Start subscription
-- `GET /api/subscription` - Check subscription status
+### Bots
+- `POST /api/bots/create` - Create new bot
+- `GET /api/bots` - Get all user bots
+- `GET /api/bots/:botId` - Get bot details
+- `POST /api/bots/:botId/toggle` - Enable/disable bot
+- `DELETE /api/bots/:botId` - Delete bot
 
-### Automation
-- `GET /api/mining/status` - Mining earnings & status
-- `GET /api/trading/signals` - AI trading signals (Pro+)
-- `POST /api/trading/execute` - Execute a trade
+### Trading
+- `POST /api/bots/:botId/signals` - Get trading signals
+- `POST /api/bots/:botId/trade` - Execute trade
+- `GET /api/bots/:botId/trades` - Get trade history
+- `GET /api/bots/:botId/performance` - Get performance metrics
+- `GET /api/trading/dashboard` - Overall dashboard
 
-### Dashboard
-- `GET /api/dashboard` - User dashboard data
-- `GET /health` - Health check
-
----
-
-## Pricing Tiers
-
-| Plan | Price | Features |
-|------|-------|----------|
-| **Starter** | $99/mo | Mining, Basic signals, Email support |
-| **Pro** | $299/mo | AI brain signals, Advanced trading, Priority support |
-| **Elite** | $499/mo | Custom automation, Dedicated manager, 24/7 support |
+### Health
+- `GET /api/health` - Health check & market hours
 
 ---
 
-## Revenue Math
+## Features
 
-**Goal:** $1M annual revenue
+✅ **5 Autonomous Bot Strategies**
+- Create unlimited bots per strategy
+- Custom stock lists per bot
+- Real-time signal generation
+- Automatic trade execution
 
-### Conservative estimate (200 customers)
-- 100 customers × $99/month (Starter) = $9,900/month
-- 80 customers × $299/month (Pro) = $23,920/month
-- 20 customers × $499/month (Elite) = $9,980/month
-- **Total: $43,800/month = $525,600/year**
+✅ **Performance Tracking**
+- Win rate calculations
+- Profit/loss tracking
+- Trade history
+- Performance analytics
 
-### Optimistic estimate (500 customers)
-- 250 customers × $99/month = $24,750/month
-- 200 customers × $299/month = $59,800/month
-- 50 customers × $499/month = $24,950/month
-- **Total: $109,500/month = $1,314,000/year ✅**
+✅ **Bot Management**
+- Enable/disable individual bots
+- Adjust risk levels (low/medium/high)
+- Monitor real-time signals
+- Track historical performance
 
 ---
 
-## Next Steps
+## Setup
 
-1. **Get real API keys:**
-   - Stripe: https://stripe.com/
-   - Unmineable: https://unmineable.com/
-   - Coinbase: https://www.coinbase.com/
-   - Robinhood: https://robinhood.com/
+### Environment Variables
+```bash
+JWT_SECRET=your_secret_key
+CLAUDE_API_KEY=your_claude_api_key
+PORT=3001
+```
 
-2. **Deploy to production**
-   - Choose Netlify, Railway, or Heroku
-   - Set environment variables
-   - Enable SSL/TLS
+### Local Development
+```bash
+npm install
+npm start
+# App runs on http://localhost:3001
+```
 
-3. **Marketing launch**
-   - Build landing page copy
-   - Create demo videos
-   - Launch ad campaign
-   - Email outreach to potential users
+### Deployment (Render)
+```bash
+git push origin main
+# Auto-deploys to Render
+```
 
-4. **Iteration**
-   - Track user acquisition cost (CAC)
-   - Monitor lifetime value (LTV)
-   - Optimize conversion rates
-   - A/B test pricing tiers
+---
+
+## Trading Bot Setup
+
+1. **Create Account** - Sign up on the app
+2. **Create Bot** - Choose a strategy (Momentum, Mean Reversion, etc.)
+3. **Add Stocks** - Enter stock symbols (AAPL, MSFT, TSLA, etc.)
+4. **Configure Risk** - Set risk level (low/medium/high)
+5. **Enable Bot** - Bots start running during market hours (9 AM - 5 PM EST)
+6. **Monitor** - Track signals and trades on the dashboard
 
 ---
 
 ## Production Checklist
 
-- [ ] Real Stripe keys configured
-- [ ] Real Unmineable API key added
-- [ ] Real Coinbase credentials set
-- [ ] Real Robinhood account integrated
-- [ ] SSL/TLS enabled
-- [ ] Database set up (PostgreSQL/MongoDB)
+- [ ] JWT secret configured
+- [ ] Claude API key added (for AI Smart Bot)
+- [ ] SSL/TLS enabled (Render handles this)
+- [ ] Database set up (optional, for persistent trades)
 - [ ] Error logging configured
-- [ ] Security audit completed
+- [ ] Robinhood API credentials (for real trading)
+- [ ] Market hours timezone correct (EST)
+- [ ] Bot signal accuracy tested
 - [ ] Terms of Service & Privacy Policy
-- [ ] Legal review (financial services)
+- [ ] Legal review (automated trading)
+
+---
+
+## Tech Stack
+
+**Backend:** Node.js, Express, JWT  
+**Frontend:** HTML5, CSS3, JavaScript (Vanilla)  
+**Deployment:** Render (auto-deploy on git push)  
+**AI:** Claude API (for AI Smart Bot strategy)  
+**Authentication:** JWT tokens (30-day expiry)  
 
 ---
 
 ## Support
 
-For questions or deployment help, reach out to your team lead.
+For questions or help, check the code or reach out.
 
-**Built with:** Node.js, Express, Stripe, AutoRule AI Brain  
-**Status:** Production Ready  
-**Version:** 1.0.0
+**Status:** Live & Production Ready  
+**Version:** 1.0.0 - Trading Bots Only  
+**URL:** https://mining-bot-deploy.onrender.com
