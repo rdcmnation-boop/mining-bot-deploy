@@ -4,8 +4,11 @@
   "description": "RDCM Mining Bot - 24/7 Cryptocurrency Mining on Mobile via Unmineable",
   "main": "server.js",
   "scripts": {
-    "start": "node server.js",
-    "dev": "nodemon server.js"
+    "start": "node server-live-money.js",
+    "start:legacy": "node server.js",
+    "start:phase1": "node server-phase1-mining.js",
+    "start:phase2": "node server-phase2-trading.js",
+    "dev": "nodemon server-live-money.js"
   },
   "keywords": ["mining", "cryptocurrency", "blockchain", "unmineable", "mobile"],
   "author": "RDCM Nation",
@@ -21,7 +24,8 @@
     "uuid": "^9.0.0",
     "jsonwebtoken": "^9.0.2",
     "bcryptjs": "^2.4.3",
-    "express-rate-limit": "^7.1.5"
+    "express-rate-limit": "^7.1.5",
+    "node-fetch": "^2.6.11"
   },
   "devDependencies": {
     "nodemon": "^2.0.22"
