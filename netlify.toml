@@ -1,40 +1,28 @@
-# RDCM Nation - Live Money Platform
-# Netlify Configuration
+# RDCM Nation - Mining Dashboard
+# Netlify Configuration - Oct 3 2026 15:15 UTC
 
 [build]
-  command = "echo 'Static site ready'"
+  command = "echo 'Mining dashboard ready for deployment'"
   publish = "public"
+  base = ""
 
-[[redirects]]
-  from = "/api/*"
-  to = "/.netlify/functions/:splat"
-  status = 200
-
+# SPA routing - serve index.html for all routes
 [[redirects]]
   from = "/*"
   to = "/index.html"
   status = 200
+  force = false
 
-[env.production]
-  # Production environment variables
-  [env.production.context.production.environment]
-    NODE_ENV = "production"
-    PORT = "8080"
-
-[functions]
-  node_bundler = "esbuild"
-  node_version = "22.0.0"
-
+# No-cache headers for live content
 [[headers]]
   for = "/*"
   [headers.values]
-    Cache-Control = "no-cache, no-store, must-revalidate"
+    Cache-Control = "public, max-age=0, must-revalidate"
     Pragma = "no-cache"
     Expires = "0"
 
+# Specific cache for static assets if needed
 [[headers]]
-  for = "/api/*"
+  for = "/assets/*"
   [headers.values]
-    Access-Control-Allow-Origin = "*"
-    Access-Control-Allow-Methods = "GET, POST, PUT, DELETE, OPTIONS"
-    Access-Control-Allow-Headers = "Content-Type, Authorization"
+    Cache-Control = "public, max-age=31536000, immutable"
