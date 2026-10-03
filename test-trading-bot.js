@@ -127,7 +127,7 @@ async function testAnalytics() {
 }
 
 async function testFullCycle() {
-  console.log('\n🧪 Test 5: Full Automation Cycle');
+  console.log('\n🧪 Test 5: Full Automation Cycle with Smart Trading');
   console.log('━'.repeat(50));
 
   try {
@@ -138,7 +138,9 @@ async function testFullCycle() {
       console.log(`   Mining earnings: ${result.earnings?.totalEarnings || 'N/A'} ${result.earnings?.coin}`);
       console.log(`   Conversion: $${result.conversion?.usdAmount || 'N/A'}`);
       console.log(`   USD balance: $${result.usdBalance}`);
-      console.log(`   Investments: ${result.investment?.orders?.length || 0} orders`);
+      console.log(`   Market regime: ${result.smartTrading?.marketRegime?.trend || 'N/A'}`);
+      console.log(`   Smart trades planned: ${result.smartTrading?.execution?.totalTrades || 0}`);
+      console.log(`   Risk/Reward ratio: ${result.smartTrading?.riskMetrics?.riskRewardRatio || 'N/A'}`);
       console.log(`   Portfolio gain: ${result.analytics?.gainPercent || 'N/A'}%`);
       return true;
     } else {

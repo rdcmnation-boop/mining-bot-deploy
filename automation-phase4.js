@@ -1,12 +1,13 @@
 /**
  * Phase 4: Full Automation
  * - Auto-convert mining earnings to USD
- * - Auto-invest USD in stocks
+ * - Smart AI-driven stock trading
  * - Portfolio rebalancing
- * - Advanced analytics
+ * - Advanced analytics with risk management
  */
 
 const fetch = require('node-fetch');
+const { analyzeMarketRegime, generateSmartSignal, executeSmartTrades, calculateRiskMetrics, runSmartTradingCycle } = require('./smart-trading-engine');
 
 // Config
 const UNMINEABLE_API_BASE = 'https://api.unmineable.com/v4';
@@ -329,25 +330,59 @@ async function runAutomationCycle(userId, config) {
     const usdBalance = await getUSDBalance(config.coinbaseApiKey, config.coinbaseSecret);
     console.log('💰 USD Balance:', usdBalance);
 
-    // 4. Auto-invest in stocks
-    const investment = await autoInvestInStocks(
-      userId,
-      usdBalance,
-      config.robinhoodToken,
-      config.strategy || 'balanced'
-    );
-    console.log('📈 Investment:', investment);
+    // 4. Smart AI-driven trading
+    console.log('🤖 Initiating smart trading cycle...');
+
+    // Top stocks to trade
+    const symbols = ['AAPL', 'MSFT', 'AMZN', 'TSLA', 'NVDA'];
+
+    // Get technical indicators for all symbols
+    const indicators = {};
+    const { getTechnicalIndicators } = require('./trading-signals');
+    for (const symbol of symbols) {
+      indicators[symbol] = await getTechnicalIndicators(symbol);
+    }
+
+    // Analyze market regime
+    const marketRegime = await analyzeMarketRegime(symbols, indicators);
+    console.log('📊 Market Regime:', marketRegime.trend);
+
+    // Generate smart trading signals
+    const portfolio = {
+      positions: [],
+      totalValue: config.initialPortfolioValue || 100000
+    };
+
+    const smartSignals = {};
+    for (const symbol of symbols) {
+      const signal = await generateSmartSignal(symbol, indicators[symbol], marketRegime, portfolio);
+      smartSignals[symbol] = signal;
+    }
+    console.log('🎯 Smart Signals Generated');
+
+    // Execute smart trades with risk management
+    const smartTrading = await executeSmartTrades(smartSignals, portfolio, config.robinhoodToken, marketRegime);
+    console.log('📈 Smart Trades Planned:', smartTrading?.totalTrades);
+
+    // Calculate risk metrics
+    const riskMetrics = calculateRiskMetrics(smartTrading?.trades || [], portfolio);
+    console.log('⚖️ Risk/Reward Ratio:', riskMetrics?.riskRewardRatio);
 
     // 5. Get portfolio analytics
     const analytics = await getPortfolioAnalytics(userId, config.robinhoodToken);
-    console.log('📊 Analytics:', analytics);
+    console.log('📊 Portfolio Analytics:', analytics);
 
     return {
       success: true,
       earnings,
       conversion,
       usdBalance,
-      investment,
+      smartTrading: {
+        marketRegime,
+        signals: smartSignals,
+        execution: smartTrading,
+        riskMetrics
+      },
       analytics,
       timestamp: new Date()
     };
