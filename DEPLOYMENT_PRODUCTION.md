@@ -64,11 +64,17 @@ git push heroku main
 - `POST /api/automation/convert` - Sell crypto for USD
 - `GET /api/automation/analytics` - Portfolio metrics
 
-#### AI Trading
+#### AI Trading (Standard)
 - `POST /api/trading/signals` - Get BUY/SELL signals (array of symbols)
 - `GET /api/trading/signal/:symbol` - Signal for one stock
 - `POST /api/trading/execute-signals` - Execute AI trades
 - `GET /api/trading/metrics` - Trading performance
+
+#### Smart Trading (Advanced)
+- `POST /api/trading/smart/regime` - Analyze market conditions
+- `POST /api/trading/smart/signals` - Smart signals with risk management
+- `POST /api/trading/smart/execute` - Execute trades with stop-loss/take-profit
+- `POST /api/trading/smart/cycle` - Full automated smart trading cycle
 
 #### Full Automation
 - `POST /api/automation/run` - Full cycle: earn → convert → trade
@@ -82,6 +88,35 @@ git push heroku main
 4. **11:00 AM EST** - Execute high-confidence trades (>60%)
 5. **3:00 PM EST** - Rebalance portfolio
 6. **4:00 PM EST** - Calculate daily metrics
+
+### Smart Trading Features
+
+**Market-Aware Trading:**
+- Detects market regime (bullish/bearish/neutral)
+- Calculates market breadth and volatility
+- Avoids trading against dominant trend
+- Scales position size with market conditions
+
+**Advanced Risk Management:**
+- Confidence-based position sizing (1-5% per trade)
+- Dynamic stop-loss levels
+- Take-profit targets calculated from technical levels
+- Risk/reward ratio optimization (aim for 1:2 minimum)
+- Volatility-adjusted entry sizing
+
+**Technical Analysis Scoring:**
+- RSI analysis (oversold/overbought detection)
+- MACD trend confirmation
+- Bollinger Band reversal signals
+- Moving average crossover (50/200-day)
+- Volume-weighted momentum
+
+**Trade Execution Filters:**
+- Only trades with >65% confidence
+- Rejects trades against market regime
+- Validates position availability
+- Calculates risk/reward before execution
+- Logs all trade reasoning
 
 ### How It Makes Money
 
@@ -102,10 +137,25 @@ git push heroku main
 curl http://localhost:3001/health
 ```
 
-**Trading Signals:**
+**Smart Trading Signals:**
 ```bash
-curl -H "Authorization: Bearer YOUR_TOKEN" \
-  http://localhost:3001/api/trading/signal/AAPL
+# Get market regime analysis
+curl -X POST -H "Authorization: Bearer YOUR_TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{"symbols":["AAPL","MSFT","AMZN"]}' \
+  http://localhost:3001/api/trading/smart/regime
+
+# Generate smart signals with risk management
+curl -X POST -H "Authorization: Bearer YOUR_TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{"symbols":["AAPL","MSFT","AMZN"]}' \
+  http://localhost:3001/api/trading/smart/signals
+
+# Execute smart trades automatically
+curl -X POST -H "Authorization: Bearer YOUR_TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{"symbols":["AAPL","MSFT","AMZN"]}' \
+  http://localhost:3001/api/trading/smart/execute
 ```
 
 ### Risk Management
