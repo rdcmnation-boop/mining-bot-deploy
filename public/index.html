@@ -85,20 +85,10 @@
     </div>
 
     <script>
-        // Check if user is logged in
-        const token = localStorage.getItem('token');
-
-        if (token) {
-            // Logged in - go to dashboard
-            setTimeout(() => {
-                window.location.href = '/dashboard.html';
-            }, 500);
-        } else {
-            // Not logged in - go to login
-            setTimeout(() => {
-                window.location.href = '/login.html';
-            }, 500);
-        }
+        // Redirect to mining dashboard
+        setTimeout(() => {
+            window.location.href = '/dashboard.html';
+        }, 500);
     </script>
 </body>
 </html>
