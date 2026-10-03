@@ -16,6 +16,8 @@ const path = require('path');
 const crypto = require('crypto');
 const { URL } = require('url');
 const { BrokerManager } = require('./broker-integration');
+const AutoRulesEngine = require('./auto-rules-engine');
+const AutoRuleBrain = require('./autorule-brain-integration');
 
 // CONFIG
 const CONFIG = {
@@ -152,6 +154,8 @@ class RequestHandler {
     this.pathname = this.url.pathname;
     this.db = new Database();
     this.brokerManager = new BrokerManager();
+    this.autoRulesEngine = new AutoRulesEngine();
+    this.autoRuleBrain = new AutoRuleBrain();
   }
 
   async handle() {
@@ -175,9 +179,40 @@ class RequestHandler {
       '/api/trades/execute-live': () => this.executeLiveTrade(),
       '/api/trades/history': () => this.getTradeHistory(),
       '/api/dashboard': () => this.getDashboard(),
+      // AutoRule Routes
+      '/api/rules/create': () => this.createAutoRule(),
+      '/api/rules': () => this.getAutoRules(),
+      '/api/rules/brain/metrics': () => this.getBrainMetrics(),
+      '/api/rules/monitor': () => this.monitorAutoRules(),
     };
 
-    const handler = routes[this.pathname];
+    // Check exact routes first
+    let handler = routes[this.pathname];
+
+    // Check dynamic routes
+    if (!handler) {
+      // Handle /api/rules/:ruleId routes
+      if (this.pathname.startsWith('/api/rules/') && this.pathname !== '/api/rules/create' && this.pathname !== '/api/rules/brain/metrics') {
+        const parts = this.pathname.split('/');
+        if (parts[3] === 'toggle') {
+          handler = () => this.toggleAutoRule(parts[2]);
+        } else if (parts[3] === 'history') {
+          handler = () => this.getAutoRuleHistory(parts[2]);
+        } else if (this.method === 'GET') {
+          handler = () => this.getAutoRuleById(parts[2]);
+        } else if (this.method === 'PUT') {
+          handler = () => this.updateAutoRule(parts[2]);
+        } else if (this.method === 'DELETE') {
+          handler = () => this.deleteAutoRule(parts[2]);
+        }
+      }
+      // Handle /api/rules/stats/:userId
+      else if (this.pathname.startsWith('/api/rules/stats/')) {
+        const userId = this.pathname.split('/api/rules/stats/')[1];
+        handler = () => this.getAutoRuleStats(userId);
+      }
+    }
+
     if (handler) {
       try {
         await handler.call(this);
@@ -422,6 +457,169 @@ class RequestHandler {
     });
   }
 
+  // AutoRule Methods
+  async createAutoRule() {
+    const body = await this.readBody();
+    const { userId, ruleName, conditions, action } = body;
+
+    if (!userId || !ruleName || !conditions || !action) {
+      return this.error(400, 'Missing required fields');
+    }
+
+    try {
+      const rule = this.autoRulesEngine.createRule(userId, ruleName, conditions, action);
+      return this.send(201, {
+        success: true,
+        rule,
+        message: `✅ AutoRule "${ruleName}" created successfully`
+      });
+    } catch (e) {
+      return this.error(500, e.message);
+    }
+  }
+
+  async getAutoRules() {
+    const userId = this.url.searchParams.get('userId');
+
+    if (!userId) {
+      return this.error(400, 'userId query parameter required');
+    }
+
+    try {
+      const rules = this.autoRulesEngine.getUserRules(userId);
+      return this.send(200, {
+        success: true,
+        count: rules.length,
+        rules
+      });
+    } catch (e) {
+      return this.error(500, e.message);
+    }
+  }
+
+  async getAutoRuleById(ruleId) {
+    try {
+      const rule = this.autoRulesEngine.rules.find(r => r.id === ruleId);
+      if (!rule) {
+        return this.error(404, 'Rule not found');
+      }
+
+      return this.send(200, { success: true, rule });
+    } catch (e) {
+      return this.error(500, e.message);
+    }
+  }
+
+  async updateAutoRule(ruleId) {
+    const body = await this.readBody();
+
+    try {
+      const rule = this.autoRulesEngine.updateRule(ruleId, body);
+      if (!rule) {
+        return this.error(404, 'Rule not found');
+      }
+
+      return this.send(200, {
+        success: true,
+        rule,
+        message: '✅ AutoRule updated successfully'
+      });
+    } catch (e) {
+      return this.error(500, e.message);
+    }
+  }
+
+  async deleteAutoRule(ruleId) {
+    try {
+      const deleted = this.autoRulesEngine.deleteRule(ruleId);
+      return this.send(200, {
+        success: deleted,
+        message: deleted ? '✅ AutoRule deleted successfully' : 'Rule not found'
+      });
+    } catch (e) {
+      return this.error(500, e.message);
+    }
+  }
+
+  async toggleAutoRule(ruleId) {
+    const body = await this.readBody();
+    const { enabled } = body;
+
+    try {
+      const rule = this.autoRulesEngine.toggleRule(ruleId, enabled);
+      if (!rule) {
+        return this.error(404, 'Rule not found');
+      }
+
+      return this.send(200, {
+        success: true,
+        rule,
+        message: `${enabled ? '✅ Enabled' : '⏸ Disabled'} rule: ${rule.name}`
+      });
+    } catch (e) {
+      return this.error(500, e.message);
+    }
+  }
+
+  async monitorAutoRules() {
+    const body = await this.readBody();
+    const { currentPrices } = body;
+
+    if (!currentPrices || typeof currentPrices !== 'object') {
+      return this.error(400, 'currentPrices object required');
+    }
+
+    try {
+      const executions = await this.autoRulesEngine.monitorRules(currentPrices);
+      return this.send(200, {
+        success: true,
+        executionCount: executions.length,
+        executions
+      });
+    } catch (e) {
+      return this.error(500, e.message);
+    }
+  }
+
+  async getAutoRuleHistory(ruleId) {
+    try {
+      const history = this.autoRulesEngine.getExecutionHistory(ruleId);
+      return this.send(200, {
+        success: true,
+        ruleId,
+        count: history.length,
+        history
+      });
+    } catch (e) {
+      return this.error(500, e.message);
+    }
+  }
+
+  async getAutoRuleStats(userId) {
+    try {
+      const stats = this.autoRulesEngine.getStats(userId);
+      return this.send(200, {
+        success: true,
+        userId,
+        stats
+      });
+    } catch (e) {
+      return this.error(500, e.message);
+    }
+  }
+
+  async getBrainMetrics() {
+    try {
+      const metrics = this.autoRuleBrain.getMetrics();
+      return this.send(200, {
+        success: true,
+        brain: metrics
+      });
+    } catch (e) {
+      return this.error(500, e.message);
+    }
+  }
+
   generateJWT(userId, email, isOwner = false) {
     const header = Buffer.from(JSON.stringify({ alg: 'HS256', typ: 'JWT' })).toString('base64');
     const payload = {
@@ -444,8 +642,8 @@ const server = http.createServer(async (req, res) => {
 server.listen(CONFIG.PORT, () => {
   console.log(`
 ╔════════════════════════════════════════════════════════════════╗
-║   🚀 RDCM QUANTUM v2.1 - WITH REAL BROKER INTEGRATION          ║
-║   Live Trading: Robinhood + Coinbase                           ║
+║   🚀 RDCM QUANTUM v2.1 - QUANTUM AI BRAIN POWERED              ║
+║   AutoRule + Broker Integration + AI Momentum Trading          ║
 ╚════════════════════════════════════════════════════════════════╝
 
 ✅ Robinhood Integration
@@ -458,14 +656,35 @@ server.listen(CONFIG.PORT, () => {
    - Real wallet management
    - Live order execution
 
-📊 NEW ENDPOINTS:
+✅ AutoRule Quantum AI Brain
+   - Momentum scoring (0-100)
+   - Rule creation & management
+   - Automatic execution
+   - Real-time monitoring
+
+📊 API ENDPOINTS:
+   POST   /api/rules/create
+   GET    /api/rules?userId=<id>
+   POST   /api/rules/:ruleId/toggle
+   DELETE /api/rules/:ruleId
+   GET    /api/rules/:ruleId/history
+   GET    /api/rules/stats/:userId
+   POST   /api/rules/monitor
+   GET    /api/rules/brain/metrics
+
    POST   /api/brokers/connect-robinhood
    POST   /api/brokers/connect-coinbase
    GET    /api/brokers/portfolio
    POST   /api/trades/execute-live
    GET    /api/trades/history
 
-🎯 READY FOR LIVE TRADING
+🧠 AI BRAIN STATS:
+   Edition: ${require('./autorule-brain-edition.json').edition}
+   Accuracy: ${(require('./autorule-brain-edition.json').accuracy * 100).toFixed(1)}%
+   Brain Score: ${require('./autorule-brain-edition.json').brain_score}
+   Trained Lessons: ${require('./autorule-brain-edition.json').lessons.toLocaleString()}
+
+🎯 QUANTUM AI TRADING READY
   `);
 });
 
