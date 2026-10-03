@@ -337,7 +337,7 @@
                 <h2>💰 Total Balance</h2>
                 <div class="metric">
                     <div class="metric-label">USD Equivalent</div>
-                    <div class="metric-value">$1,247.50</div>
+                    <div class="metric-value" data-metric="balance">$1,247.50</div>
                     <div class="metric-change positive">↑ +$247.50 this month</div>
                 </div>
                 <div class="metric">
@@ -357,7 +357,7 @@
                 <h2>📈 Daily Earnings</h2>
                 <div class="metric">
                     <div class="metric-label">Daily Average</div>
-                    <div class="metric-value">$12.40</div>
+                    <div class="metric-value" data-metric="daily">$12.40</div>
                     <div class="metric-change">Per day (24/7)</div>
                 </div>
                 <div class="metric">
@@ -564,16 +564,68 @@
     </div>
 
     <script>
-        // Live data updates
-        setInterval(() => {
-            // Update mining metrics in real-time
-        }, 5000);
+        // Unmineable API Integration
+        const UNMINEABLE_API = 'https://api.unmineable.com/v1';
 
-        // Test API connection
+        async function fetchMiningData() {
+            try {
+                // Get mining balance
+                const response = await fetch('/api/automation/earnings');
+                const data = await response.json();
+
+                if (data.success) {
+                    updateDashboard(data);
+                    console.log('Mining data updated:', data);
+                }
+            } catch (e) {
+                console.log('Fetching mining data:', e.message);
+            }
+        }
+
+        function updateDashboard(data) {
+            // Update total balance
+            const balanceEl = document.querySelector('[data-metric="balance"]');
+            if (balanceEl) {
+                balanceEl.textContent = `$${(data.totalBalance || 0).toFixed(2)}`;
+            }
+
+            // Update daily earnings
+            const dailyEl = document.querySelector('[data-metric="daily"]');
+            if (dailyEl) {
+                dailyEl.textContent = `$${(data.dailyEarnings || 12.40).toFixed(2)}`;
+            }
+
+            // Update coins
+            if (data.coins) {
+                const coinList = document.querySelector('[data-coins]');
+                if (coinList) {
+                    coinList.innerHTML = data.coins.map(coin => `
+                        <div class="coin-card">
+                            <div>
+                                <div class="coin-name">${coin.symbol} (${coin.name})</div>
+                                <div class="coin-rate">Rate: ${coin.rate}x</div>
+                            </div>
+                            <div>
+                                <div class="coin-balance">${coin.balance} ${coin.symbol}</div>
+                                <div class="coin-usd">$${coin.usdValue.toFixed(2)} USD</div>
+                            </div>
+                        </div>
+                    `).join('');
+                }
+            }
+        }
+
+        // Initial load
+        fetchMiningData();
+
+        // Auto-refresh every 30 seconds
+        setInterval(fetchMiningData, 30000);
+
+        // Health check
         fetch('/health')
             .then(r => r.json())
-            .then(data => console.log('Mining status:', data))
-            .catch(e => console.log('Mining API initializing'));
+            .then(data => console.log('System online:', data))
+            .catch(e => console.log('API connecting...'));
     </script>
 </body>
 </html>
